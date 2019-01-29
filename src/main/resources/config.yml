@@ -3,6 +3,7 @@ settings:
         username: username
         password: password
     bungeecord: true
+    essentials: false
     ranking:
         enable: true
         prefix: true

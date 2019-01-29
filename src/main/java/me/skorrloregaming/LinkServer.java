@@ -89,6 +89,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 			@Override
 			public void run() {
 				for (Player player : Bukkit.getOnlinePlayers()) {
+					if (getPlugin().getConfig().getBoolean("settings.essentials", false))
+						player.setPlayerListName(player.getDisplayName());
 					String path = "config." + player.getUniqueId().toString();
 					boolean subscribed = Boolean.parseBoolean(getPlugin().getConfig().getString(path + ".subscribed", "true"));
 					if (subscribed) {
