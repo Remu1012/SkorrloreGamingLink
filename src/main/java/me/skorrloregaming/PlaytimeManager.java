@@ -103,9 +103,6 @@ public class PlaytimeManager {
 					LinkServer.getSqlDatabase().set("playtime.dayOfYear." + day, player.getUniqueId().toString(), null);
 			}
 		}
-		if (!LinkServer.getSqlDatabase().contains("playtime.total", player.getUniqueId().toString())) {
-			LinkServer.getSqlDatabase().set("playtime.total", player.getUniqueId().toString(), CraftGo.Player.getLegacyMinecraftPlaytime(player) + "");
-		}
 		LinkServer.getSqlDatabase().set("playtime.lastKnownDayOfYear", player.getUniqueId().toString(), dayOfYear + "");
 		playtimeTracker.put(player.getUniqueId(), seconds);
 	}
