@@ -7,11 +7,17 @@ import me.skorrloregaming.impl.ServerMinigame;
 import me.skorrloregaming.mysql.SQLDatabase;
 import me.skorrloregaming.runnable.AutoBroadcaster;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
@@ -162,6 +168,39 @@ public class LinkServer extends JavaPlugin implements Listener {
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		Player player = event.getPlayer();
 		getPlaytimeManager().handle_QuitEvent(player);
+		if (getBarApiTitleIndex().containsKey(player.getUniqueId()))
+			getBarApiTitleIndex().remove(player.getUniqueId());
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onPlayerInteract(PlayerInteractEvent event) {
+		Player player = event.getPlayer();
+		if (getAntiCheat().antiafk.lastPlayerLocation.containsKey(player.getUniqueId()) && getAntiCheat().antiafk.lastPlayerLocation.get(player.getUniqueId()).getWorld().getName().equals(player.getWorld().getName())) {
+			if (!player.isInsideVehicle() && getAntiCheat().antiafk.lastPlayerLocation.get(player.getUniqueId()).distance(player.getLocation()) > 1.25) {
+				if (getAntiCheat().antiafk.lackingActivityMinutes.containsKey(player.getUniqueId()))
+					getAntiCheat().antiafk.lackingActivityMinutes.remove(player.getUniqueId());
+			}
+		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onPlayerChat(AsyncPlayerChatEvent event) {
+		Player player = event.getPlayer();
+		if (getAntiCheat().antiafk.lackingActivityMinutes.containsKey(player.getUniqueId()))
+			getAntiCheat().antiafk.lackingActivityMinutes.remove(player.getUniqueId());
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onEntityAttack(EntityDamageByEntityEvent event) {
+		if (event.getDamager() instanceof Firework && event.getEntity() instanceof Player) {
+			event.setCancelled(true);
+			return;
+		}
+		if (event.getDamager() instanceof Player) {
+			Player damager = (Player) event.getDamager();
+			if (getAntiCheat().antiafk.lackingActivityMinutes.containsKey(damager.getUniqueId()))
+				getAntiCheat().antiafk.lackingActivityMinutes.remove(damager.getUniqueId());
+		}
 	}
 
 }
