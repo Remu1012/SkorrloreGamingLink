@@ -90,6 +90,8 @@ public class ProtocolSupport_Listener implements Listener {
 	@EventHandler
 	public void onPlayerProfileComplete(PlayerProfileCompleteEvent event) {
 		String playerName = event.getConnection().getProfile().getOriginalName();
+		UUID offlineUUID = UUID.nameUUIDFromBytes(("OfflinePlayer:" + event.getConnection().getProfile().getName()).getBytes());
+		event.setForcedUUID(offlineUUID);
 		String path = "sync." + event.getConnection().getProfile().getOriginalName();
 		if (LinkServer.getPlugin().getConfig().contains(path)) {
 			if (LinkServer.getPlugin().getConfig().getBoolean(path + ".est", false)) {

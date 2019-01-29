@@ -70,6 +70,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 		if (Link$.isPluginEnabled("ProtocolSupport")) {
 			protoSupportListener = new ProtocolSupport_Listener();
 			protoSupportListener.register();
+			protoSupportListener.disableProtocolVersions();
 		}
 		geolCacheConfig = new ConfigurationManager();
 		geolCacheConfig.setup(new File(this.getDataFolder(), "geolocation_cache.yml"));
