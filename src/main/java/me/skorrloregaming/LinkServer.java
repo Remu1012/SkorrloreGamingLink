@@ -52,7 +52,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
-		plugin = plugin;
+		this.plugin = this;
 		getConfig().options().copyDefaults(true);
 		saveConfig();
 		String dbUsername = getConfig().getString("settings.database.username", "username");
