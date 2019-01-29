@@ -1,0 +1,9 @@
+settings:
+    database:
+        username: username
+        password: password
+    bungeecord: true
+    ranking:
+        enable: true
+        prefix: true
+config:
