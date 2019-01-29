@@ -134,6 +134,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 		boolean _1m3 = Boolean.parseBoolean(getConfig().getString("settings.enable.protocolsupport.versions.PE"));
 		disabledVersions.clear();
 		if (!_1m13) {
+			disabledVersions.add("1.13.2");
 			disabledVersions.add("1.13.1");
 			disabledVersions.add("1.13");
 		}
@@ -143,7 +144,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 			disabledVersions.add("1.12");
 		}
 		if (!_1m11) {
-			disabledVersions.add("1.11.2");
+			disabledVersions.add("1.11.1");
 			disabledVersions.add("1.11");
 		}
 		if (!_1m10) {
