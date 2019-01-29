@@ -17,3 +17,9 @@ commands:
     playtime:
         description: Retrieves the play time for a given player
         aliases: pt
+    desync:
+        description: Unlink your alternative account from your primary account
+        aliases: [unsync, desync-account, desyncaccount, unsync-account, unsyncaccount, unsynca, desynca, delink, delink-account, delinka, unlinka, unlink, unlink-account]
+    sync:
+        description: Link your alternative account with your primary account
+        aliases: [sync-account, syncaccount, synca, link-account, linkaccount, link, linka]

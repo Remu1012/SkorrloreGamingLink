@@ -1,11 +1,10 @@
 package me.skorrloregaming;
 
 import me.skorrloregaming.commands.*;
-import me.skorrloregaming.impl.ServerMinigame;
+import me.skorrloregaming.hooks.ProtocolSupport_Listener;
 import me.skorrloregaming.mysql.SQLDatabase;
 import me.skorrloregaming.runnable.AutoBroadcaster;
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.entity.Firework;
@@ -21,9 +20,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import protocolsupport.protocol.packet.middleimpl.serverbound.play.v_4_5_6_7_8_9r1_9r2_10_11_12r1_12r2_13.InventoryClick;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -40,6 +39,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	private static AntiCheat anticheat;
 
+	private static ProtocolSupport_Listener protoSupportListener;
+
 	private static ConfigurationManager geolCacheConfig;
 	private static ConfigurationManager uuidCacheConfig;
 
@@ -48,6 +49,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	private static final long BASIC_INVENTORY_UPDATE_DELAY = 5L;
 
+	private static ArrayList<String> disabledVersions = new ArrayList<String>();
+
 	private static ConcurrentMap<UUID, Integer> barApiTitleIndex = new ConcurrentHashMap<>();
 
 	@Override
@@ -55,6 +58,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 		this.plugin = this;
 		getConfig().options().copyDefaults(true);
 		saveConfig();
+		reload();
 		String dbUsername = getConfig().getString("settings.database.username", "username");
 		String dbPassword = getConfig().getString("settings.database.password", "password");
 		barApi = new CraftGo.BarApi();
@@ -63,6 +67,10 @@ public class LinkServer extends JavaPlugin implements Listener {
 		playtimeManager = new PlaytimeManager();
 		anticheat = new AntiCheat();
 		anticheat.register();
+		if (Link$.isPluginEnabled("ProtocolSupport")) {
+			protoSupportListener = new ProtocolSupport_Listener();
+			protoSupportListener.register();
+		}
 		geolCacheConfig = new ConfigurationManager();
 		geolCacheConfig.setup(new File(this.getDataFolder(), "geolocation_cache.yml"));
 		uuidCacheConfig = new ConfigurationManager();
@@ -73,6 +81,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 		getCommand("unsubscribe").setExecutor(new UnsubscribeCmd());
 		getCommand("playtime-report").setExecutor(new PlaytimeReportCmd());
 		getCommand("playtime").setExecutor(new PlaytimeCmd());
+		getCommand("desync").setExecutor(new DesyncCmd());
+		getCommand("sync").setExecutor(new SyncCmd());
 		Bukkit.getScheduler().runTaskTimer(this, new AutoBroadcaster(), 6000L, 12000L);
 		Bukkit.getScheduler().runTaskTimer(getPlugin(), new Runnable() {
 			@Override
@@ -108,6 +118,66 @@ public class LinkServer extends JavaPlugin implements Listener {
 		sqlDatabase.close();
 	}
 
+	public void reload() {
+		reloadConfig();
+		boolean _1m13 = Boolean.parseBoolean(getConfig().getString("settings.enable.protocolsupport.versions.PC.1m12"));
+		boolean _1m12 = Boolean.parseBoolean(getConfig().getString("settings.enable.protocolsupport.versions.PC.1m12"));
+		boolean _1m11 = Boolean.parseBoolean(getConfig().getString("settings.enable.protocolsupport.versions.PC.1m11"));
+		boolean _1m10 = Boolean.parseBoolean(getConfig().getString("settings.enable.protocolsupport.versions.PC.1m10"));
+		boolean _1m9 = Boolean.parseBoolean(getConfig().getString("settings.enable.protocolsupport.versions.PC.1m9"));
+		boolean _1m8 = Boolean.parseBoolean(getConfig().getString("settings.enable.protocolsupport.versions.PC.1m8"));
+		boolean _1m7 = Boolean.parseBoolean(getConfig().getString("settings.enable.protocolsupport.versions.PC.1m7"));
+		boolean _1m6 = Boolean.parseBoolean(getConfig().getString("settings.enable.protocolsupport.versions.PC.1m6"));
+		boolean _1m5 = Boolean.parseBoolean(getConfig().getString("settings.enable.protocolsupport.versions.PC.1m5"));
+		boolean _1m4 = Boolean.parseBoolean(getConfig().getString("settings.enable.protocolsupport.versions.PC.1m4"));
+		boolean _1m3 = Boolean.parseBoolean(getConfig().getString("settings.enable.protocolsupport.versions.PE"));
+		disabledVersions.clear();
+		if (!_1m13) {
+			disabledVersions.add("1.13.1");
+			disabledVersions.add("1.13");
+		}
+		if (!_1m12) {
+			disabledVersions.add("1.12.2");
+			disabledVersions.add("1.12.1");
+			disabledVersions.add("1.12");
+		}
+		if (!_1m11) {
+			disabledVersions.add("1.11.2");
+			disabledVersions.add("1.11");
+		}
+		if (!_1m10) {
+			disabledVersions.add("1.10");
+		}
+		if (!_1m9) {
+			disabledVersions.add("1.9.4");
+			disabledVersions.add("1.9.2");
+			disabledVersions.add("1.9.1");
+			disabledVersions.add("1.9");
+		}
+		if (!_1m8) {
+			disabledVersions.add("1.8");
+		}
+		if (!_1m7) {
+			disabledVersions.add("1.7.10");
+			disabledVersions.add("1.7.5");
+		}
+		if (!_1m6) {
+			disabledVersions.add("1.6.4");
+			disabledVersions.add("1.6.2");
+			disabledVersions.add("1.6.1");
+		}
+		if (!_1m5) {
+			disabledVersions.add("1.5.2");
+			disabledVersions.add("1.5.1");
+		}
+		if (!_1m4) {
+			disabledVersions.add("1.4.7");
+		}
+		if (!_1m3) {
+			disabledVersions.add("pe");
+		}
+	}
+
 	public static Plugin getPlugin() {
 		return plugin;
 	}
@@ -126,6 +196,10 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	public static AntiCheat getAntiCheat() {
 		return anticheat;
+	}
+
+	public static ProtocolSupport_Listener getProtoSupportListener() {
+		return protoSupportListener;
 	}
 
 	public static ConfigurationManager getGeolocationCache() {
@@ -154,6 +228,10 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	public static void setIngameAnticheatDebug(boolean enabled) {
 		ingameAnticheatDebug = enabled;
+	}
+
+	public static ArrayList<String> getDisabledVersions() {
+		return disabledVersions;
 	}
 
 	public static ConcurrentMap<UUID, Integer> getBarApiTitleIndex() {
