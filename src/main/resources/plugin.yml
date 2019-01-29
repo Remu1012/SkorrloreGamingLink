@@ -11,3 +11,9 @@ commands:
     logger:
         description: Enable or disable in-game anticheat logging
         aliases: logging
+    playtime-report:
+        description: Gets the range of stored playtime information for a player
+        aliases: [playtime-report, ptreport, ptr]
+    playtime:
+        description: Retrieves the play time for a given player
+        aliases: pt

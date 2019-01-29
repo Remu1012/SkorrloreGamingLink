@@ -18,11 +18,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class PlaytimeManager implements Listener {
+public class PlaytimeManager {
 	public ConcurrentMap<UUID, Long> playtimeTracker = new ConcurrentHashMap<>();
 
 	public PlaytimeManager() {
-		LinkServer.getPlugin().getServer().getPluginManager().registerEvents(this, LinkServer.getPlugin());
 		Bukkit.getScheduler().runTaskTimer(LinkServer.getPlugin(), new Runnable() {
 			@Override
 			public void run() {

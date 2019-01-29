@@ -1,8 +1,6 @@
 package me.skorrloregaming;
 
-import me.skorrloregaming.commands.DebugCmd;
-import me.skorrloregaming.commands.LoggerCmd;
-import me.skorrloregaming.commands.UnsubscribeCmd;
+import me.skorrloregaming.commands.*;
 import me.skorrloregaming.impl.ServerMinigame;
 import me.skorrloregaming.mysql.SQLDatabase;
 import me.skorrloregaming.runnable.AutoBroadcaster;
@@ -16,12 +14,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import protocolsupport.protocol.packet.middleimpl.serverbound.play.v_4_5_6_7_8_9r1_9r2_10_11_12r1_12r2_13.InventoryClick;
 
 import java.io.File;
 import java.util.UUID;
@@ -71,6 +71,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 		getCommand("debug").setExecutor(new DebugCmd());
 		getCommand("logger").setExecutor(new LoggerCmd());
 		getCommand("unsubscribe").setExecutor(new UnsubscribeCmd());
+		getCommand("playtime-report").setExecutor(new PlaytimeReportCmd());
+		getCommand("playtime").setExecutor(new PlaytimeCmd());
 		Bukkit.getScheduler().runTaskTimer(this, new AutoBroadcaster(), 6000L, 12000L);
 		Bukkit.getScheduler().runTaskTimer(getPlugin(), new Runnable() {
 			@Override
@@ -201,6 +203,11 @@ public class LinkServer extends JavaPlugin implements Listener {
 			if (getAntiCheat().antiafk.lackingActivityMinutes.containsKey(damager.getUniqueId()))
 				getAntiCheat().antiafk.lackingActivityMinutes.remove(damager.getUniqueId());
 		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onInventoryClick(InventoryClickEvent event) {
+		event.setCancelled(getPlaytimeManager().onInventoryClick(event));
 	}
 
 }
