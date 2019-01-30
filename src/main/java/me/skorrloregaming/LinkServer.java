@@ -263,9 +263,9 @@ public class LinkServer extends JavaPlugin implements Listener {
 			if (getConfig().getBoolean("settings.subserver.is", false)) {
 				String server = getConfig().getString("settings.subserver.name", "undefined");
 				String message = Link$.Legacy.tag + ChatColor.RED + player.getName() + ChatColor.GRAY + " has logged into " + ChatColor.RED + server;
-				bungeeListener.broadcastMessage(message);
+				bungeeListener.broadcastMessage(player, message);
 				message = message.substring(message.indexOf(ChatColor.RED + ""));
-				bungeeListener.broadcastDiscordMessage(message.replace(player.getName(), "**" + player.getName() + "**"));
+				bungeeListener.broadcastDiscordMessage(player, message.replace(player.getName(), "**" + player.getName() + "**"));
 				event.setJoinMessage(null);
 			}
 		}
@@ -281,9 +281,9 @@ public class LinkServer extends JavaPlugin implements Listener {
 			if (getConfig().getBoolean("settings.subserver.is", false)) {
 				String server = getConfig().getString("settings.subserver.name", "undefined");
 				String message = Link$.Legacy.tag + ChatColor.RED + player.getName() + ChatColor.GRAY + " has quit " + ChatColor.RED + server;
-				bungeeListener.broadcastMessage(message);
+				bungeeListener.broadcastMessage(player, message);
 				message = message.substring(message.indexOf(ChatColor.RED + ""));
-				bungeeListener.broadcastDiscordMessage(message.replace(player.getName(), "**" + player.getName() + "**"));
+				bungeeListener.broadcastDiscordMessage(player, message.replace(player.getName(), "**" + player.getName() + "**"));
 				event.setQuitMessage(null);
 			}
 		}
@@ -311,16 +311,16 @@ public class LinkServer extends JavaPlugin implements Listener {
 				String server = getConfig().getString("settings.subserver.name", "undefined").toLowerCase();
 				String processedMessage = getAntiCheat().processAntiSwear(player, event.getMessage());
 				String msg = ChatColor.GRAY + "[" + ChatColor.WHITE + server + ChatColor.GRAY + "] " + ChatColor.RESET + player.getDisplayName() + ChatColor.RESET + " " + '\u00BB' + " " + processedMessage;
-				bungeeListener.broadcastMessage(msg);
+				bungeeListener.broadcastMessage(player, msg);
 				if (Link$.isPrefixedRankingEnabled()) {
 					String rankName = WordUtils.capitalize(Link$.toRankDisplayName(Link$.getRank(player)));
 					if (rankName.equals("Youtube"))
 						rankName = "YouTube";
 					String message = "**" + rankName + "** " + player.getName() + " " + '\u00BB' + " " + processedMessage;
-					bungeeListener.broadcastDiscordMessage(message);
+					bungeeListener.broadcastDiscordMessage(player, message);
 				} else {
 					String message = "**" + player.getName() + "** " + '\u00BB' + " " + processedMessage;
-					bungeeListener.broadcastDiscordMessage(message);
+					bungeeListener.broadcastDiscordMessage(player, message);
 				}
 				event.setCancelled(true);
 				return;

@@ -4,6 +4,7 @@ settings:
         password: password
     bungeecord: true
     essentials: false
+    discordBotServer: 'main'
     subserver:
         is: true
         name: 'undefined'
