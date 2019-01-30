@@ -4,6 +4,9 @@ settings:
         password: password
     bungeecord: true
     essentials: false
+    subserver:
+        is: true
+        name: 'undefined'
     ranking:
         enable: true
         prefix: true

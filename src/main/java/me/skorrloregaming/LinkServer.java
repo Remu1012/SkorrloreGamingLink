@@ -1,10 +1,13 @@
 package me.skorrloregaming;
 
 import me.skorrloregaming.commands.*;
+import me.skorrloregaming.hooks.BungeeCord_Listener;
 import me.skorrloregaming.hooks.ProtocolSupport_Listener;
 import me.skorrloregaming.mysql.SQLDatabase;
 import me.skorrloregaming.runnable.AutoBroadcaster;
+import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.entity.Firework;
@@ -39,6 +42,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	private static AntiCheat anticheat;
 
+	private static BungeeCord_Listener bungeeListener;
 	private static ProtocolSupport_Listener protoSupportListener;
 
 	private static ConfigurationManager geolCacheConfig;
@@ -67,6 +71,10 @@ public class LinkServer extends JavaPlugin implements Listener {
 		playtimeManager = new PlaytimeManager();
 		anticheat = new AntiCheat();
 		anticheat.register();
+		if (getConfig().getBoolean("settings.bungeecord", false)) {
+			bungeeListener = new BungeeCord_Listener();
+			bungeeListener.register();
+		}
 		if (Link$.isPluginEnabled("ProtocolSupport")) {
 			protoSupportListener = new ProtocolSupport_Listener();
 			protoSupportListener.register();
@@ -119,6 +127,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 	public void onDisable() {
 		barApi.onDisable();
 		sqlDatabase.close();
+		bungeeListener.unregister();
 	}
 
 	public void reload() {
@@ -202,6 +211,10 @@ public class LinkServer extends JavaPlugin implements Listener {
 		return anticheat;
 	}
 
+	public static BungeeCord_Listener getBungeeListener() {
+		return bungeeListener;
+	}
+
 	public static ProtocolSupport_Listener getProtoSupportListener() {
 		return protoSupportListener;
 	}
@@ -246,6 +259,16 @@ public class LinkServer extends JavaPlugin implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		getPlaytimeManager().handle_JoinEvent(player);
+		if (getConfig().getBoolean("settings.bungeecord", true)) {
+			if (getConfig().getBoolean("settings.subserver.is", false)) {
+				String server = getConfig().getString("settings.subserver.name", "undefined");
+				String message = Link$.Legacy.tag + ChatColor.RED + player.getName() + ChatColor.GRAY + " has logged into " + ChatColor.RED + server;
+				bungeeListener.broadcastMessage(player, message);
+				message = message.substring(message.indexOf(ChatColor.RED + ""));
+				bungeeListener.broadcastDiscordMessage(player, message.replace(player.getName(), "**" + player.getName() + "**"));
+				event.setJoinMessage(null);
+			}
+		}
 	}
 
 	@EventHandler
@@ -254,6 +277,16 @@ public class LinkServer extends JavaPlugin implements Listener {
 		getPlaytimeManager().handle_QuitEvent(player);
 		if (getBarApiTitleIndex().containsKey(player.getUniqueId()))
 			getBarApiTitleIndex().remove(player.getUniqueId());
+		if (getConfig().getBoolean("settings.bungeecord", true)) {
+			if (getConfig().getBoolean("settings.subserver.is", false)) {
+				String server = getConfig().getString("settings.subserver.name", "undefined");
+				String message = Link$.Legacy.tag + ChatColor.RED + player.getName() + ChatColor.GRAY + " has quit " + ChatColor.RED + server;
+				bungeeListener.broadcastMessage(player, message);
+				message = message.substring(message.indexOf(ChatColor.RED + ""));
+				bungeeListener.broadcastDiscordMessage(player, message.replace(player.getName(), "**" + player.getName() + "**"));
+				event.setQuitMessage(null);
+			}
+		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -272,6 +305,27 @@ public class LinkServer extends JavaPlugin implements Listener {
 		Player player = event.getPlayer();
 		if (getAntiCheat().antiafk.lackingActivityMinutes.containsKey(player.getUniqueId()))
 			getAntiCheat().antiafk.lackingActivityMinutes.remove(player.getUniqueId());
+		String world = player.getWorld().getName();
+		if (getConfig().getBoolean("settings.bungeecord", true)) {
+			if (getConfig().getBoolean("settings.subserver.is", false)) {
+				String server = getConfig().getString("settings.subserver.name", "undefined").toLowerCase();
+				String processedMessage = getAntiCheat().processAntiSwear(player, event.getMessage());
+				String msg = ChatColor.GRAY + "[" + ChatColor.WHITE + server + ChatColor.GRAY + "] " + ChatColor.RESET + player.getDisplayName() + ChatColor.RESET + " " + '\u00BB' + " " + processedMessage;
+				bungeeListener.broadcastMessage(player, msg);
+				if (Link$.isPrefixedRankingEnabled()) {
+					String rankName = WordUtils.capitalize(Link$.toRankDisplayName(Link$.getRank(player)));
+					if (rankName.equals("Youtube"))
+						rankName = "YouTube";
+					String message = "**" + rankName + "** " + player.getName() + " " + '\u00BB' + " " + processedMessage;
+					bungeeListener.broadcastDiscordMessage(player, message);
+				} else {
+					String message = "**" + player.getName() + "** " + '\u00BB' + " " + processedMessage;
+					bungeeListener.broadcastDiscordMessage(player, message);
+				}
+				event.setCancelled(true);
+				return;
+			}
+		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
