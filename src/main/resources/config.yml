@@ -4,7 +4,8 @@ settings:
         password: password
     bungeecord: true
     essentials: false
-    discordBotServer: 'main'
+    discordBotChannelChatAndRanks: 'SERVER_CHAT'
+    discordBotChannelRanks: 'SERVER_LOG'
     subserver:
         is: true
         name: 'undefined'
@@ -26,4 +27,8 @@ settings:
                     1m5: false
                     1m4: false
                 PE: true
+    redis:
+        hostname: 'localhost'
+        port: 6379
+        password: ''
 config:

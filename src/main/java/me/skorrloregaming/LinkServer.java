@@ -1,8 +1,8 @@
 package me.skorrloregaming;
 
 import me.skorrloregaming.commands.*;
-import me.skorrloregaming.hooks.BungeeCord_Listener;
 import me.skorrloregaming.hooks.ProtocolSupport_Listener;
+import me.skorrloregaming.hooks.Redis_Listener;
 import me.skorrloregaming.mysql.SQLDatabase;
 import me.skorrloregaming.runnable.AutoBroadcaster;
 import org.apache.commons.lang.WordUtils;
@@ -42,7 +42,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	private static AntiCheat anticheat;
 
-	private static BungeeCord_Listener bungeeListener;
+	private static Redis_Listener redisListener;
 	private static ProtocolSupport_Listener protoSupportListener;
 
 	private static ConfigurationManager geolCacheConfig;
@@ -50,6 +50,9 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	private static boolean pluginDebug = false;
 	private static boolean ingameAnticheatDebug = true;
+
+	private static String discordBotChannelChatAndRanks;
+	private static String discordBotChannelRanks;
 
 	private static final long BASIC_INVENTORY_UPDATE_DELAY = 5L;
 
@@ -65,6 +68,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 		reload();
 		String dbUsername = getConfig().getString("settings.database.username", "username");
 		String dbPassword = getConfig().getString("settings.database.password", "password");
+		discordBotChannelChatAndRanks = getConfig().getString("settings.discordBotChannelChatAndRanks", "SERVER_CHAT");
+		discordBotChannelRanks = getConfig().getString("settings.discordBotChannelRanks", "SERVER_LOG");
 		barApi = new CraftGo.BarApi();
 		barApi.onEnable();
 		sqlDatabase = new SQLDatabase("localhost", dbUsername, dbPassword);
@@ -72,8 +77,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 		anticheat = new AntiCheat();
 		anticheat.register();
 		if (getConfig().getBoolean("settings.bungeecord", false)) {
-			bungeeListener = new BungeeCord_Listener();
-			bungeeListener.register();
+			redisListener = new Redis_Listener();
+			redisListener.register();
 		}
 		if (Link$.isPluginEnabled("ProtocolSupport")) {
 			protoSupportListener = new ProtocolSupport_Listener();
@@ -127,7 +132,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 	public void onDisable() {
 		barApi.onDisable();
 		sqlDatabase.close();
-		bungeeListener.unregister();
+		redisListener.unregister();
 	}
 
 	public void reload() {
@@ -211,8 +216,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 		return anticheat;
 	}
 
-	public static BungeeCord_Listener getBungeeListener() {
-		return bungeeListener;
+	public static Redis_Listener getRedisListener() {
+		return redisListener;
 	}
 
 	public static ProtocolSupport_Listener getProtoSupportListener() {
@@ -229,6 +234,14 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	public static long getInventoryUpdateDelay() {
 		return BASIC_INVENTORY_UPDATE_DELAY;
+	}
+
+	public static String getDiscordBotChannelChatAndRanks() {
+		return discordBotChannelChatAndRanks;
+	}
+
+	public static String getDiscordBotChannelRanks() {
+		return discordBotChannelRanks;
 	}
 
 	public static boolean getPluginDebug() {
@@ -263,9 +276,9 @@ public class LinkServer extends JavaPlugin implements Listener {
 			if (getConfig().getBoolean("settings.subserver.is", false)) {
 				String server = getConfig().getString("settings.subserver.name", "undefined");
 				String message = Link$.Legacy.tag + ChatColor.RED + player.getName() + ChatColor.GRAY + " has logged into " + ChatColor.RED + server;
-				bungeeListener.broadcastMessage(player, message);
+				redisListener.broadcastMessage(message);
 				message = message.substring(message.indexOf(ChatColor.RED + ""));
-				bungeeListener.broadcastDiscordMessage(player, message.replace(player.getName(), "**" + player.getName() + "**"));
+				redisListener.broadcastDiscordMessage(message.replace(player.getName(), "**" + player.getName() + "**"), discordBotChannelChatAndRanks);
 				event.setJoinMessage(null);
 			}
 		}
@@ -281,9 +294,9 @@ public class LinkServer extends JavaPlugin implements Listener {
 			if (getConfig().getBoolean("settings.subserver.is", false)) {
 				String server = getConfig().getString("settings.subserver.name", "undefined");
 				String message = Link$.Legacy.tag + ChatColor.RED + player.getName() + ChatColor.GRAY + " has quit " + ChatColor.RED + server;
-				bungeeListener.broadcastMessage(player, message);
+				redisListener.broadcastMessage(message);
 				message = message.substring(message.indexOf(ChatColor.RED + ""));
-				bungeeListener.broadcastDiscordMessage(player, message.replace(player.getName(), "**" + player.getName() + "**"));
+				redisListener.broadcastDiscordMessage(message.replace(player.getName(), "**" + player.getName() + "**"), discordBotChannelChatAndRanks);
 				event.setQuitMessage(null);
 			}
 		}
@@ -311,16 +324,16 @@ public class LinkServer extends JavaPlugin implements Listener {
 				String server = getConfig().getString("settings.subserver.name", "undefined").toLowerCase();
 				String processedMessage = getAntiCheat().processAntiSwear(player, event.getMessage());
 				String msg = ChatColor.GRAY + "[" + ChatColor.WHITE + server + ChatColor.GRAY + "] " + ChatColor.RESET + player.getDisplayName() + ChatColor.RESET + " " + '\u00BB' + " " + processedMessage;
-				bungeeListener.broadcastMessage(player, msg);
+				redisListener.broadcastMessage(msg);
 				if (Link$.isPrefixedRankingEnabled()) {
 					String rankName = WordUtils.capitalize(Link$.toRankDisplayName(Link$.getRank(player)));
 					if (rankName.equals("Youtube"))
 						rankName = "YouTube";
 					String message = "**" + rankName + "** " + player.getName() + " " + '\u00BB' + " " + processedMessage;
-					bungeeListener.broadcastDiscordMessage(player, message);
+					redisListener.broadcastDiscordMessage(message, discordBotChannelChatAndRanks);
 				} else {
 					String message = "**" + player.getName() + "** " + '\u00BB' + " " + processedMessage;
-					bungeeListener.broadcastDiscordMessage(player, message);
+					redisListener.broadcastDiscordMessage(message, discordBotChannelChatAndRanks);
 				}
 				event.setCancelled(true);
 				return;
