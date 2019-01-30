@@ -296,6 +296,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 			if (getConfig().getBoolean("settings.subServer", false)) {
 				String message = Link$.Legacy.tag + ChatColor.RED + player.getName() + ChatColor.GRAY + " has logged into " + ChatColor.RED + getServerName();
 				redisMessenger.broadcast(RedisChannel.CHAT, new MapBuilder().message(message).build());
+				message = message = message.substring(message.indexOf(ChatColor.RED + ""));
 				message = message.replace(player.getName(), "**" + player.getName() + "**");
 				redisMessenger.broadcast(RedisChannel.DISCORD, new MapBuilder().message(message).channel(discordChannel).build());
 				event.setJoinMessage(null);
