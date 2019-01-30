@@ -36,6 +36,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	private static Plugin plugin;
 
+	private static LinkServer instance;
+
 	private static CraftGo.BarApi barApi = null;
 
 	private static SQLDatabase sqlDatabase;
@@ -44,7 +46,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	private static AntiCheat anticheat;
 
-	private static RedisMessenger redisListener;
+	private static RedisMessenger redisMessenger;
 	private static ProtocolSupport_Listener protoSupportListener;
 
 	private static ConfigurationManager geolCacheConfig;
@@ -64,6 +66,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
+		this.instance = this;
 		this.plugin = this;
 		getConfig().options().copyDefaults(true);
 		saveConfig();
@@ -79,8 +82,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 		anticheat = new AntiCheat();
 		anticheat.register();
 		if (getConfig().getBoolean("settings.bungeecord", false)) {
-			redisListener = new RedisMessenger();
-			redisListener.register();
+			redisMessenger = new RedisMessenger();
+			redisMessenger.register();
 		}
 		if (Link$.isPluginEnabled("ProtocolSupport")) {
 			protoSupportListener = new ProtocolSupport_Listener();
@@ -134,7 +137,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 	public void onDisable() {
 		barApi.onDisable();
 		sqlDatabase.close();
-		redisListener.unregister();
+		redisMessenger.unregister();
 	}
 
 	public void reload() {
@@ -218,8 +221,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 		return anticheat;
 	}
 
-	public static RedisMessenger getRedisListener() {
-		return redisListener;
+	public static RedisMessenger getRedisMessenger() {
+		return redisMessenger;
 	}
 
 	public static ProtocolSupport_Listener getProtoSupportListener() {
@@ -270,6 +273,10 @@ public class LinkServer extends JavaPlugin implements Listener {
 		return barApiTitleIndex;
 	}
 
+	public static LinkServer getInstance() {
+		return instance;
+	}
+
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
@@ -277,9 +284,9 @@ public class LinkServer extends JavaPlugin implements Listener {
 		if (getConfig().getBoolean("settings.bungeecord", true)) {
 			if (getConfig().getBoolean("settings.subServer", false)) {
 				String message = Link$.Legacy.tag + ChatColor.RED + player.getName() + ChatColor.GRAY + " has logged into " + ChatColor.RED + getServerName();
-				redisListener.broadcast(RedisChannel.CHAT, new MapBuilder().message(message).build());
+				redisMessenger.broadcast(RedisChannel.CHAT, new MapBuilder().message(message).build());
 				message = message.replace(player.getName(), "**" + player.getName() + "**");
-				redisListener.broadcast(RedisChannel.DISCORD, new MapBuilder().message(message).channel(discordChannel).build());
+				redisMessenger.broadcast(RedisChannel.DISCORD, new MapBuilder().message(message).channel(discordChannel).build());
 				event.setJoinMessage(null);
 			}
 		}
@@ -294,10 +301,10 @@ public class LinkServer extends JavaPlugin implements Listener {
 		if (getConfig().getBoolean("settings.bungeecord", true)) {
 			if (getConfig().getBoolean("settings.subServer", false)) {
 				String message = Link$.Legacy.tag + ChatColor.RED + player.getName() + ChatColor.GRAY + " has quit " + ChatColor.RED + getServerName();
-				redisListener.broadcast(RedisChannel.CHAT, new MapBuilder().message(message).build());
+				redisMessenger.broadcast(RedisChannel.CHAT, new MapBuilder().message(message).build());
 				message = message.substring(message.indexOf(ChatColor.RED + ""));
 				message = message.replace(player.getName(), "**" + player.getName() + "**");
-				redisListener.broadcast(RedisChannel.DISCORD, new MapBuilder().message(message).channel(discordChannel).build());
+				redisMessenger.broadcast(RedisChannel.DISCORD, new MapBuilder().message(message).channel(discordChannel).build());
 				event.setQuitMessage(null);
 			}
 		}
@@ -324,16 +331,16 @@ public class LinkServer extends JavaPlugin implements Listener {
 			if (getConfig().getBoolean("settings.subServer", false)) {
 				String processedMessage = getAntiCheat().processAntiSwear(player, event.getMessage());
 				String msg = ChatColor.GRAY + "[" + ChatColor.WHITE + getServerName().toLowerCase() + ChatColor.GRAY + "] " + ChatColor.RESET + player.getDisplayName() + ChatColor.RESET + " " + '\u00BB' + " " + processedMessage;
-				redisListener.broadcast(RedisChannel.CHAT, new MapBuilder().message(msg).build());
+				redisMessenger.broadcast(RedisChannel.CHAT, new MapBuilder().message(msg).build());
 				if (Link$.isPrefixedRankingEnabled()) {
 					String rankName = WordUtils.capitalize(Link$.toRankDisplayName(Link$.getRank(player)));
 					if (rankName.equals("Youtube"))
 						rankName = "YouTube";
 					String message = "**" + rankName + "** " + player.getName() + " " + '\u00BB' + " " + processedMessage;
-					redisListener.broadcast(RedisChannel.DISCORD, new MapBuilder().message(message).channel(discordChannel).build());
+					redisMessenger.broadcast(RedisChannel.DISCORD, new MapBuilder().message(message).channel(discordChannel).build());
 				} else {
 					String message = "**" + player.getName() + "** " + '\u00BB' + " " + processedMessage;
-					redisListener.broadcast(RedisChannel.DISCORD, new MapBuilder().message(message).channel(discordChannel).build());
+					redisMessenger.broadcast(RedisChannel.DISCORD, new MapBuilder().message(message).channel(discordChannel).build());
 				}
 				event.setCancelled(true);
 				return;
