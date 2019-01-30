@@ -2,7 +2,9 @@ package me.skorrloregaming;
 
 import me.skorrloregaming.commands.*;
 import me.skorrloregaming.hooks.ProtocolSupport_Listener;
-import me.skorrloregaming.hooks.Redis_Listener;
+import me.skorrloregaming.redis.MapBuilder;
+import me.skorrloregaming.redis.RedisChannel;
+import me.skorrloregaming.redis.RedisMessenger;
 import me.skorrloregaming.mysql.SQLDatabase;
 import me.skorrloregaming.runnable.AutoBroadcaster;
 import org.apache.commons.lang.WordUtils;
@@ -42,7 +44,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	private static AntiCheat anticheat;
 
-	private static Redis_Listener redisListener;
+	private static RedisMessenger redisListener;
 	private static ProtocolSupport_Listener protoSupportListener;
 
 	private static ConfigurationManager geolCacheConfig;
@@ -52,8 +54,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 	private static boolean ingameAnticheatDebug = true;
 
 	private static String serverName;
-	private static String discordBotChannelChatAndRanks;
-	private static String discordBotChannelRanks;
+	private static String discordChannel;
 
 	private static final long BASIC_INVENTORY_UPDATE_DELAY = 5L;
 
@@ -70,8 +71,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 		String dbUsername = getConfig().getString("settings.database.username", "username");
 		String dbPassword = getConfig().getString("settings.database.password", "password");
 		serverName = getConfig().getString("settings.serverName", "lobby");
-		discordBotChannelChatAndRanks = getConfig().getString("settings.discordBotChannelChatAndRanks", "SERVER_CHAT");
-		discordBotChannelRanks = getConfig().getString("settings.discordBotChannelRanks", "SERVER_LOG");
+		discordChannel = getConfig().getString("settings.discordChannel", "SERVER_CHAT");
 		barApi = new CraftGo.BarApi();
 		barApi.onEnable();
 		sqlDatabase = new SQLDatabase("localhost", dbUsername, dbPassword);
@@ -79,7 +79,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 		anticheat = new AntiCheat();
 		anticheat.register();
 		if (getConfig().getBoolean("settings.bungeecord", false)) {
-			redisListener = new Redis_Listener();
+			redisListener = new RedisMessenger();
 			redisListener.register();
 		}
 		if (Link$.isPluginEnabled("ProtocolSupport")) {
@@ -218,7 +218,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 		return anticheat;
 	}
 
-	public static Redis_Listener getRedisListener() {
+	public static RedisMessenger getRedisListener() {
 		return redisListener;
 	}
 
@@ -242,12 +242,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 		return serverName;
 	}
 
-	public static String getDiscordBotChannelChatAndRanks() {
-		return discordBotChannelChatAndRanks;
-	}
-
-	public static String getDiscordBotChannelRanks() {
-		return discordBotChannelRanks;
+	public static String getDiscordChannel() {
+		return discordChannel;
 	}
 
 	public static boolean getPluginDebug() {
@@ -281,9 +277,9 @@ public class LinkServer extends JavaPlugin implements Listener {
 		if (getConfig().getBoolean("settings.bungeecord", true)) {
 			if (getConfig().getBoolean("settings.subServer", false)) {
 				String message = Link$.Legacy.tag + ChatColor.RED + player.getName() + ChatColor.GRAY + " has logged into " + ChatColor.RED + getServerName();
-				redisListener.broadcastMessage(message);
-				message = message.substring(message.indexOf(ChatColor.RED + ""));
-				redisListener.broadcastDiscordMessage(message.replace(player.getName(), "**" + player.getName() + "**"), discordBotChannelChatAndRanks);
+				redisListener.broadcast(RedisChannel.CHAT, new MapBuilder().message(message).build());
+				message = message.replace(player.getName(), "**" + player.getName() + "**");
+				redisListener.broadcast(RedisChannel.DISCORD, new MapBuilder().message(message).channel(discordChannel).build());
 				event.setJoinMessage(null);
 			}
 		}
@@ -298,9 +294,10 @@ public class LinkServer extends JavaPlugin implements Listener {
 		if (getConfig().getBoolean("settings.bungeecord", true)) {
 			if (getConfig().getBoolean("settings.subServer", false)) {
 				String message = Link$.Legacy.tag + ChatColor.RED + player.getName() + ChatColor.GRAY + " has quit " + ChatColor.RED + getServerName();
-				redisListener.broadcastMessage(message);
+				redisListener.broadcast(RedisChannel.CHAT, new MapBuilder().message(message).build());
 				message = message.substring(message.indexOf(ChatColor.RED + ""));
-				redisListener.broadcastDiscordMessage(message.replace(player.getName(), "**" + player.getName() + "**"), discordBotChannelChatAndRanks);
+				message = message.replace(player.getName(), "**" + player.getName() + "**");
+				redisListener.broadcast(RedisChannel.DISCORD, new MapBuilder().message(message).channel(discordChannel).build());
 				event.setQuitMessage(null);
 			}
 		}
@@ -327,16 +324,16 @@ public class LinkServer extends JavaPlugin implements Listener {
 			if (getConfig().getBoolean("settings.subServer", false)) {
 				String processedMessage = getAntiCheat().processAntiSwear(player, event.getMessage());
 				String msg = ChatColor.GRAY + "[" + ChatColor.WHITE + getServerName().toLowerCase() + ChatColor.GRAY + "] " + ChatColor.RESET + player.getDisplayName() + ChatColor.RESET + " " + '\u00BB' + " " + processedMessage;
-				redisListener.broadcastMessage(msg);
+				redisListener.broadcast(RedisChannel.CHAT, new MapBuilder().message(msg).build());
 				if (Link$.isPrefixedRankingEnabled()) {
 					String rankName = WordUtils.capitalize(Link$.toRankDisplayName(Link$.getRank(player)));
 					if (rankName.equals("Youtube"))
 						rankName = "YouTube";
 					String message = "**" + rankName + "** " + player.getName() + " " + '\u00BB' + " " + processedMessage;
-					redisListener.broadcastDiscordMessage(message, discordBotChannelChatAndRanks);
+					redisListener.broadcast(RedisChannel.DISCORD, new MapBuilder().message(message).channel(discordChannel).build());
 				} else {
 					String message = "**" + player.getName() + "** " + '\u00BB' + " " + processedMessage;
-					redisListener.broadcastDiscordMessage(message, discordBotChannelChatAndRanks);
+					redisListener.broadcast(RedisChannel.DISCORD, new MapBuilder().message(message).channel(discordChannel).build());
 				}
 				event.setCancelled(true);
 				return;

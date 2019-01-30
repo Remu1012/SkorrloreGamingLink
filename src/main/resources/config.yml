@@ -5,8 +5,7 @@ settings:
     bungeecord: true
     essentials: false
     subServer: true
-    discordBotChannelChatAndRanks: 'SERVER_CHAT'
-    discordBotChannelRanks: 'SERVER_LOG'
+    discordChannel: 'SERVER_CHAT'
     serverName: 'lobby'
     ranking:
         enable: true
