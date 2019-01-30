@@ -131,10 +131,8 @@ public class Redis_Listener extends JedisPubSub implements Listener {
 			JsonObject obj = gson.fromJson(request, JsonObject.class);
 			if (obj != null) {
 				String servername = obj.get("serverName").getAsString();
-				if (!servername.equalsIgnoreCase(serverID.toString())) {
-					String message = obj.get("message").getAsString();
-					Bukkit.broadcastMessage(message);
-				}
+				String message = obj.get("message").getAsString();
+				Bukkit.broadcastMessage(message);
 			}
 		}
 	}
