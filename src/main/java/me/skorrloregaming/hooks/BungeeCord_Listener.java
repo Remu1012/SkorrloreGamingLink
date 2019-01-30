@@ -14,12 +14,12 @@ import java.io.DataInputStream;
 public class BungeeCord_Listener implements PluginMessageListener {
 
 	public void register() {
-		Bukkit.getServer().getMessenger().registerIncomingPluginChannel(LinkServer.getPlugin(), "Return", this);
+		Bukkit.getServer().getMessenger().registerIncomingPluginChannel(LinkServer.getPlugin(), "slgn:return", this);
 		Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(LinkServer.getPlugin(), "BungeeCord");
 	}
 
 	public void unregister() {
-		Bukkit.getServer().getMessenger().unregisterIncomingPluginChannel(LinkServer.getPlugin(), "Return", this);
+		Bukkit.getServer().getMessenger().unregisterIncomingPluginChannel(LinkServer.getPlugin(), "slgn:return", this);
 		Bukkit.getServer().getMessenger().unregisterOutgoingPluginChannel(LinkServer.getPlugin(), "BungeeCord");
 	}
 
