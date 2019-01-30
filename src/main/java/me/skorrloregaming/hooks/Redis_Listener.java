@@ -28,8 +28,11 @@ public class Redis_Listener extends JedisPubSub implements Listener {
 	 */
 	private final UUID serverID = UUID.randomUUID();
 
+	private Redis_Listener instance;
+
 	private boolean connectToRedis() {
-		LinkServer.getPlugin().getLogger().info("Connecting to redis..");
+		instance = this;
+		LinkServer.getPlugin().getLogger().info("Connecting to Redis..");
 		String hostname = LinkServer.getPlugin().getConfig().getString("settings.redis.hostname", "localhost");
 		int port = LinkServer.getPlugin().getConfig().getInt("settings.redis.port", 6379);
 		String password = LinkServer.getPlugin().getConfig().getString("settings.redis.password");
@@ -41,6 +44,10 @@ public class Redis_Listener extends JedisPubSub implements Listener {
 			jedisPool = Optional.ofNullable(new JedisPool(poolConfig, hostname, port, 0, password));
 		}
 		return jedisPool.isPresent();
+	}
+
+	private Redis_Listener getInstance() {
+		return instance;
 	}
 
 	private boolean close() {
@@ -60,10 +67,17 @@ public class Redis_Listener extends JedisPubSub implements Listener {
 
 	public void register() {
 		connectToRedis();
-		getPool().ifPresent((pool) -> {
-			try (Jedis jedis = pool.getResource()) {
-				jedis.subscribe(this, "slgn:chat");
-			} catch (Exception ex) {
+		LinkServer.getPlugin().getLogger().info("Connected to Redis!");
+		Bukkit.getScheduler().runTaskAsynchronously(LinkServer.getPlugin(), new Runnable() {
+
+			@Override
+			public void run() {
+				getPool().ifPresent((pool) -> {
+					try (Jedis jedis = pool.getResource()) {
+						jedis.subscribe(getInstance(), "slgn:chat");
+					} catch (Exception ex) {
+					}
+				});
 			}
 		});
 	}
@@ -73,32 +87,42 @@ public class Redis_Listener extends JedisPubSub implements Listener {
 	}
 
 	public void broadcastMessage(String message) {
-		Gson gson = new GsonBuilder().create();
-		String jsonMessage = gson.toJson(message);
-		JsonObject obj = new JsonObject();
-		obj.addProperty("serverName", serverID.toString());
-		obj.addProperty("message", jsonMessage);
-		getPool().ifPresent((pool) -> {
-			try (Jedis jedis = pool.getResource()) {
-				jedis.publish("slgn:chat", obj.toString());
-			} catch (Exception ex) {
+		Bukkit.getScheduler().runTaskAsynchronously(LinkServer.getPlugin(), new Runnable() {
+
+			@Override
+			public void run() {
+				Gson gson = new GsonBuilder().create();
+				JsonObject obj = new JsonObject();
+				obj.addProperty("serverName", serverID.toString());
+				obj.addProperty("message", message);
+				getPool().ifPresent((pool) -> {
+					try (Jedis jedis = pool.getResource()) {
+						jedis.publish("slgn:chat", obj.toString());
+					} catch (Exception ex) {
+					}
+				});
 			}
 		});
 	}
 
 	public void broadcastDiscordMessage(String message, String channel) {
-		Gson gson = new GsonBuilder().create();
-		JsonObject obj = new JsonObject();
-		obj.addProperty("serverName", serverID.toString());
-		obj.addProperty("message", message);
-		obj.addProperty("discordChannel", channel);
-		getPool().ifPresent((pool) -> {
-			try (Jedis jedis = pool.getResource()) {
-				jedis.publish("slgn:discord", obj.toString());
-			} catch (Exception ex) {
+		Bukkit.getScheduler().runTaskAsynchronously(LinkServer.getPlugin(), new Runnable() {
+
+			@Override
+			public void run() {
+				Gson gson = new GsonBuilder().create();
+				JsonObject obj = new JsonObject();
+				obj.addProperty("serverName", serverID.toString());
+				obj.addProperty("message", message);
+				obj.addProperty("discordChannel", channel);
+				getPool().ifPresent((pool) -> {
+					try (Jedis jedis = pool.getResource()) {
+						jedis.publish("slgn:discord", obj.toString());
+					} catch (Exception ex) {
+					}
+				});
 			}
 		});
-
 	}
 
 	@Override
