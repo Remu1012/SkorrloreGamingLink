@@ -34,6 +34,7 @@
 									<include>com.github.SkorrloreGaming:SQLDatabase</include>
 									<include>redis.clients:jedis</include>
 									<include>com.google.code.gson:gson</include>
+									<include>org.apache.commons:commons-pool2</include>
 								</includes>
 							</artifactSet>
 						</configuration>
