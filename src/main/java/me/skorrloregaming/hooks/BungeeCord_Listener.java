@@ -47,10 +47,8 @@ public class BungeeCord_Listener implements PluginMessageListener {
 	public void onPluginMessageReceived(String channel, Player p, byte[] message) {
 		try {
 			DataInputStream in = new DataInputStream(new ByteArrayInputStream(message));
-			if (in.readUTF().equals("Broadcast")) {
-				if (LinkServer.getPlugin().getConfig().getBoolean("settings.subserver.is", true))
-					Bukkit.broadcastMessage(in.readUTF());
-			}
+			if (in.readUTF().equals("Broadcast"))
+				Bukkit.broadcastMessage(in.readUTF());
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
