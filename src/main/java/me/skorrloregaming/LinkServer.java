@@ -289,7 +289,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onInventoryClick(InventoryClickEvent event) {
-		event.setCancelled(getPlaytimeManager().onInventoryClick(event));
+		if (getPlaytimeManager().onInventoryClick(event))
+			event.setCancelled(true);
 	}
 
 }
