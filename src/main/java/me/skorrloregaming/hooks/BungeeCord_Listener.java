@@ -23,26 +23,28 @@ public class BungeeCord_Listener implements PluginMessageListener {
 		Bukkit.getServer().getMessenger().unregisterOutgoingPluginChannel(LinkServer.getPlugin(), "BungeeCord");
 	}
 
-	public void broadcastMessage(Player player, String message) {
+	public void broadcastMessage(String message) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("Broadcast");
 		out.writeUTF(ChatColor.translateAlternateColorCodes('&', message));
-		player.sendPluginMessage(LinkServer.getPlugin(), "BungeeCord", out.toByteArray());
+		Bukkit.getServer().sendPluginMessage(LinkServer.getPlugin(), "BungeeCord", out.toByteArray());
 	}
 
-	public void broadcastDiscordMessage(Player player, String message) {
+	public void broadcastDiscordMessage(String message) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("DiscordBroadcast");
 		out.writeUTF(ChatColor.stripColor(message));
-		player.sendPluginMessage(LinkServer.getPlugin(), "BungeeCord", out.toByteArray());
+		Bukkit.getServer().sendPluginMessage(LinkServer.getPlugin(), "BungeeCord", out.toByteArray());
 	}
 
 	@Override
 	public void onPluginMessageReceived(String channel, Player p, byte[] message) {
 		try {
 			DataInputStream in = new DataInputStream(new ByteArrayInputStream(message));
-			if (in.readUTF().equals("Broadcast"))
-				Bukkit.broadcastMessage(in.readUTF());
+			if (in.readUTF().equals("Broadcast")) {
+				if (LinkServer.getPlugin().getConfig().getBoolean("settings.subserver.is", true))
+					Bukkit.broadcastMessage(in.readUTF());
+			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
