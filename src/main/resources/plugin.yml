@@ -2,7 +2,6 @@ main: me.skorrloregaming.LinkServer
 name: SkorrloreGamingLink
 version: 1.0-SNAPSHOT
 description: Plugin to provide basic functionality to a server
-api-version: 1.13
 commands:
     unsubscribe:
         description: Unsubscribe from news header and auto broadcaster

@@ -49,6 +49,10 @@ public class AntiCheat implements Listener {
 	public final double withWeaponDamageMultiplierPlayer = 1;
 
 	public void register() {
+		String packageName = Bukkit.getServer().getClass().getPackage().getName();
+		String version = packageName.substring(packageName.lastIndexOf('.') + 1);
+		if (version.startsWith("v1_7") || version.startsWith("v1_8"))
+			return;
 		Bukkit.getPluginManager().registerEvents(this, LinkServer.getPlugin());
 		antiafk = new AntiAfk();
 		Bukkit.getScheduler().runTaskTimer(LinkServer.getPlugin(), antiafk, 600L, 600L);
