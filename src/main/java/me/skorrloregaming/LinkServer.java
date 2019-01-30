@@ -51,6 +51,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 	private static boolean pluginDebug = false;
 	private static boolean ingameAnticheatDebug = true;
 
+	private static String serverName;
 	private static String discordBotChannelChatAndRanks;
 	private static String discordBotChannelRanks;
 
@@ -68,6 +69,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 		reload();
 		String dbUsername = getConfig().getString("settings.database.username", "username");
 		String dbPassword = getConfig().getString("settings.database.password", "password");
+		serverName = getConfig().getString("settings.serverName", "lobby");
 		discordBotChannelChatAndRanks = getConfig().getString("settings.discordBotChannelChatAndRanks", "SERVER_CHAT");
 		discordBotChannelRanks = getConfig().getString("settings.discordBotChannelRanks", "SERVER_LOG");
 		barApi = new CraftGo.BarApi();
@@ -236,6 +238,10 @@ public class LinkServer extends JavaPlugin implements Listener {
 		return BASIC_INVENTORY_UPDATE_DELAY;
 	}
 
+	public static String getServerName() {
+		return serverName;
+	}
+
 	public static String getDiscordBotChannelChatAndRanks() {
 		return discordBotChannelChatAndRanks;
 	}
@@ -273,9 +279,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 		Player player = event.getPlayer();
 		getPlaytimeManager().handle_JoinEvent(player);
 		if (getConfig().getBoolean("settings.bungeecord", true)) {
-			if (getConfig().getBoolean("settings.subserver.is", false)) {
-				String server = getConfig().getString("settings.subserver.name", "undefined");
-				String message = Link$.Legacy.tag + ChatColor.RED + player.getName() + ChatColor.GRAY + " has logged into " + ChatColor.RED + server;
+			if (getConfig().getBoolean("settings.subServer", false)) {
+				String message = Link$.Legacy.tag + ChatColor.RED + player.getName() + ChatColor.GRAY + " has logged into " + ChatColor.RED + getServerName();
 				redisListener.broadcastMessage(message);
 				message = message.substring(message.indexOf(ChatColor.RED + ""));
 				redisListener.broadcastDiscordMessage(message.replace(player.getName(), "**" + player.getName() + "**"), discordBotChannelChatAndRanks);
@@ -291,9 +296,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 		if (getBarApiTitleIndex().containsKey(player.getUniqueId()))
 			getBarApiTitleIndex().remove(player.getUniqueId());
 		if (getConfig().getBoolean("settings.bungeecord", true)) {
-			if (getConfig().getBoolean("settings.subserver.is", false)) {
-				String server = getConfig().getString("settings.subserver.name", "undefined");
-				String message = Link$.Legacy.tag + ChatColor.RED + player.getName() + ChatColor.GRAY + " has quit " + ChatColor.RED + server;
+			if (getConfig().getBoolean("settings.subServer", false)) {
+				String message = Link$.Legacy.tag + ChatColor.RED + player.getName() + ChatColor.GRAY + " has quit " + ChatColor.RED + getServerName();
 				redisListener.broadcastMessage(message);
 				message = message.substring(message.indexOf(ChatColor.RED + ""));
 				redisListener.broadcastDiscordMessage(message.replace(player.getName(), "**" + player.getName() + "**"), discordBotChannelChatAndRanks);
@@ -320,10 +324,9 @@ public class LinkServer extends JavaPlugin implements Listener {
 			getAntiCheat().antiafk.lackingActivityMinutes.remove(player.getUniqueId());
 		String world = player.getWorld().getName();
 		if (getConfig().getBoolean("settings.bungeecord", true)) {
-			if (getConfig().getBoolean("settings.subserver.is", false)) {
-				String server = getConfig().getString("settings.subserver.name", "undefined").toLowerCase();
+			if (getConfig().getBoolean("settings.subServer", false)) {
 				String processedMessage = getAntiCheat().processAntiSwear(player, event.getMessage());
-				String msg = ChatColor.GRAY + "[" + ChatColor.WHITE + server + ChatColor.GRAY + "] " + ChatColor.RESET + player.getDisplayName() + ChatColor.RESET + " " + '\u00BB' + " " + processedMessage;
+				String msg = ChatColor.GRAY + "[" + ChatColor.WHITE + getServerName() + ChatColor.GRAY + "] " + ChatColor.RESET + player.getDisplayName() + ChatColor.RESET + " " + '\u00BB' + " " + processedMessage;
 				redisListener.broadcastMessage(msg);
 				if (Link$.isPrefixedRankingEnabled()) {
 					String rankName = WordUtils.capitalize(Link$.toRankDisplayName(Link$.getRank(player)));

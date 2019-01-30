@@ -20,14 +20,6 @@ public class Redis_Listener extends JedisPubSub implements Listener {
 
 	private final Gson gson = new Gson();
 
-	/**
-	 * Just a random UUID as a placeholder for what could be a configurable
-	 * server ID which would allow other servers to identify where a message
-	 * came from. Currently this is just used to make sure messages are not
-	 * duped.
-	 */
-	private final UUID serverID = UUID.randomUUID();
-
 	private Redis_Listener instance;
 
 	private boolean connectToRedis() {
@@ -93,7 +85,7 @@ public class Redis_Listener extends JedisPubSub implements Listener {
 			public void run() {
 				Gson gson = new GsonBuilder().create();
 				JsonObject obj = new JsonObject();
-				obj.addProperty("serverName", serverID.toString());
+				obj.addProperty("serverName", LinkServer.getServerName());
 				obj.addProperty("message", message);
 				getPool().ifPresent((pool) -> {
 					try (Jedis jedis = pool.getResource()) {
@@ -112,7 +104,6 @@ public class Redis_Listener extends JedisPubSub implements Listener {
 			public void run() {
 				Gson gson = new GsonBuilder().create();
 				JsonObject obj = new JsonObject();
-				obj.addProperty("serverName", serverID.toString());
 				obj.addProperty("message", message);
 				obj.addProperty("discordChannel", channel);
 				getPool().ifPresent((pool) -> {
@@ -130,9 +121,14 @@ public class Redis_Listener extends JedisPubSub implements Listener {
 		if (channel.equalsIgnoreCase("slgn:chat")) {
 			JsonObject obj = gson.fromJson(request, JsonObject.class);
 			if (obj != null) {
-				String servername = obj.get("serverName").getAsString();
+				String serverName = obj.get("serverName").getAsString();
 				String message = obj.get("message").getAsString();
-				Bukkit.broadcastMessage(message);
+				if (serverName.equals(LinkServer.getServerName())) {
+					if (LinkServer.getPlugin().getConfig().getBoolean("settings.subServer", false))
+						Bukkit.broadcastMessage(message);
+				} else {
+					Bukkit.broadcastMessage(message);
+				}
 			}
 		}
 	}

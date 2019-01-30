@@ -4,11 +4,10 @@ settings:
         password: password
     bungeecord: true
     essentials: false
+    subServer: true
     discordBotChannelChatAndRanks: 'SERVER_CHAT'
     discordBotChannelRanks: 'SERVER_LOG'
-    subserver:
-        is: true
-        name: 'undefined'
+    serverName: 'lobby'
     ranking:
         enable: true
         prefix: true
