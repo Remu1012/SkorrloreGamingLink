@@ -102,6 +102,17 @@ public class LinkServer extends JavaPlugin implements Listener {
 		getCommand("playtime").setExecutor(new PlaytimeCmd());
 		getCommand("desync").setExecutor(new DesyncCmd());
 		getCommand("sync").setExecutor(new SyncCmd());
+		getCommand("discord").setExecutor(new DiscordCmd());
+		getCommand("address").setExecutor(new AddressCmd());
+		getCommand("vote").setExecutor(new VoteCmd());
+		getCommand("modifications").setExecutor(new ModificationsCmd());
+		getCommand("website").setExecutor(new WebsiteCmd());
+		getCommand("vote").setExecutor(new VoteCmd());
+		getCommand("rules").setExecutor(new RulesCmd());
+		getCommand("workbench").setExecutor(new WorkbenchCmd());
+		getCommand("dispose").setExecutor(new DisposeCmd());
+		getCommand("ping").setExecutor(new PingCmd());
+		getCommand("buy").setExecutor(new BuyCmd());
 		Bukkit.getScheduler().runTaskTimer(this, new AutoBroadcaster(), 6000L, 12000L);
 		Bukkit.getScheduler().runTaskTimer(getPlugin(), new Runnable() {
 			@Override
