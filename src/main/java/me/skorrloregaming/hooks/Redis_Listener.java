@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import me.skorrloregaming.LinkServer;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.event.Listener;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -104,7 +105,7 @@ public class Redis_Listener extends JedisPubSub implements Listener {
 			public void run() {
 				Gson gson = new GsonBuilder().create();
 				JsonObject obj = new JsonObject();
-				obj.addProperty("message", message);
+				obj.addProperty("message", ChatColor.stripColor(message));
 				obj.addProperty("discordChannel", channel);
 				getPool().ifPresent((pool) -> {
 					try (Jedis jedis = pool.getResource()) {
