@@ -326,7 +326,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 		if (getConfig().getBoolean("settings.bungeecord", true)) {
 			if (getConfig().getBoolean("settings.subServer", false)) {
 				String processedMessage = getAntiCheat().processAntiSwear(player, event.getMessage());
-				String msg = ChatColor.GRAY + "[" + ChatColor.WHITE + getServerName() + ChatColor.GRAY + "] " + ChatColor.RESET + player.getDisplayName() + ChatColor.RESET + " " + '\u00BB' + " " + processedMessage;
+				String msg = ChatColor.GRAY + "[" + ChatColor.WHITE + getServerName().toLowerCase() + ChatColor.GRAY + "] " + ChatColor.RESET + player.getDisplayName() + ChatColor.RESET + " " + '\u00BB' + " " + processedMessage;
 				redisListener.broadcastMessage(msg);
 				if (Link$.isPrefixedRankingEnabled()) {
 					String rankName = WordUtils.capitalize(Link$.toRankDisplayName(Link$.getRank(player)));
