@@ -120,6 +120,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 				for (Player player : Bukkit.getOnlinePlayers()) {
 					if (getPlugin().getConfig().getBoolean("settings.essentials", false))
 						player.setPlayerListName(player.getDisplayName());
+					if (getPlugin().getConfig().getBoolean("settings.subServer", false))
+						Link$.flashPlayerDisplayName(player);
 					String path = "config." + player.getUniqueId().toString();
 					boolean subscribed = Boolean.parseBoolean(getPlugin().getConfig().getString(path + ".subscribed", "true"));
 					if (subscribed) {
@@ -300,6 +302,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 				message = message.replace(player.getName(), "**" + player.getName() + "**");
 				redisMessenger.broadcast(RedisChannel.DISCORD, new MapBuilder().message(message).channel(discordChannel).build());
 				event.setJoinMessage(null);
+				Link$.flashPlayerDisplayName(player);
 			}
 		}
 	}

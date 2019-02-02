@@ -1,5 +1,6 @@
 package me.skorrloregaming;
 
+import me.lucko.luckperms.LuckPerms;
 import me.skorrloregaming.impl.EnchantInfo;
 import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang3.text.WordUtils;
@@ -505,21 +506,21 @@ public class Link$ {
 		if (rank.equals("default"))
 			return ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + "Member" + ChatColor.DARK_GRAY + "] " + ChatColor.GRAY;
 		if (rank.equals("helper"))
-			return ChatColor.RED + "[" + ChatColor.GRAY + "Helper" + ChatColor.RED + "] ";
+			return ChatColor.RED + "[" + ChatColor.GRAY + "Helper" + ChatColor.RED + "] " + ChatColor.RED;
 		if (rank.equals("developer"))
 			return ChatColor.DARK_PURPLE + "[" + ChatColor.LIGHT_PURPLE + "Developer" + ChatColor.DARK_PURPLE + "] " + ChatColor.LIGHT_PURPLE;
 		if (rank.equals("builder"))
 			return ChatColor.GRAY + "[" + ChatColor.WHITE + "Builder" + ChatColor.GRAY + "] " + ChatColor.WHITE;
 		if (rank.equals("moderator"))
-			return ChatColor.RED + "[" + ChatColor.GRAY + "Moderator" + ChatColor.RED + "] ";
+			return ChatColor.RED + "[" + ChatColor.GRAY + "Moderator" + ChatColor.RED + "] " + ChatColor.RED;
 		if (rank.equals("admin"))
-			return ChatColor.RED + "[" + ChatColor.GRAY + "Admin" + ChatColor.RED + "] ";
+			return ChatColor.RED + "[" + ChatColor.GRAY + "Admin" + ChatColor.RED + "] " + ChatColor.RED;
 		if (rank.equals("manager"))
-			return ChatColor.RED + "[" + ChatColor.GRAY + "Manager" + ChatColor.RED + "] ";
+			return ChatColor.RED + "[" + ChatColor.GRAY + "Manager" + ChatColor.RED + "] " + ChatColor.RED;
 		if (rank.equals("owner"))
-			return ChatColor.RED + "[" + ChatColor.GRAY + "Owner" + ChatColor.RED + "] ";
+			return ChatColor.RED + "[" + ChatColor.GRAY + "Owner" + ChatColor.RED + "] " + ChatColor.RED;
 		if (rank.equals("founder"))
-			return ChatColor.RED + "[" + ChatColor.GRAY + "Founder" + ChatColor.RED + "] ";
+			return ChatColor.RED + "[" + ChatColor.GRAY + "Founder" + ChatColor.RED + "] " + ChatColor.RED;
 		if (rank.equals("donator"))
 			return ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "Donator" + ChatColor.DARK_GREEN + "] " + ChatColor.GRAY;
 		if (rank.equals("youtube"))
@@ -637,16 +638,41 @@ public class Link$ {
 		return getDonorRankId(player.getUniqueId());
 	}
 
+	public static String getLuckPermsRank(OfflinePlayer player) {
+		Plugin luckPerms;
+		if ((luckPerms = Bukkit.getPluginManager().getPlugin("LuckPerms")) == null) {
+			return null;
+		} else {
+			return (LuckPerms.getApi().getUser(player.getUniqueId()).getPrimaryGroup()).toUpperCase();
+		}
+	}
+
 	public static void flashPlayerDisplayName(Player player) {
 		String rank = getRank(player);
 		String donorRank = getDonorRank(player);
+		String luckPermsRank = getLuckPermsRank(player);
+		String luckyPrefix = ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + luckPermsRank + ChatColor.DARK_GREEN + "] ";
+		String rankColour = toRankTag(rank).substring(toRankTag(rank).lastIndexOf("] ") + 2);
+		String donorRankColour = toRankTag(donorRank).substring(toRankTag(donorRank).lastIndexOf("] ") + 2);
 		if (donorRank.equals("default")) {
-			player.setDisplayName(toRankTag(rank) + player.getName() + ChatColor.RESET);
+			if (luckPermsRank == null) {
+				player.setDisplayName(toRankTag(rank) + player.getName() + ChatColor.RESET);
+			} else {
+				player.setDisplayName(toRankTag(rank) + luckyPrefix + rankColour + player.getName() + ChatColor.RESET);
+			}
 		} else {
 			if (rank.equals("default")) {
-				player.setDisplayName(toRankTag(donorRank) + player.getName() + ChatColor.RESET);
+				if (luckPermsRank == null) {
+					player.setDisplayName(toRankTag(donorRank) + player.getName() + ChatColor.RESET);
+				} else {
+					player.setDisplayName(toRankTag(donorRank) + luckyPrefix + donorRankColour + player.getName() + ChatColor.RESET);
+				}
 			} else {
-				player.setDisplayName(toRankTag(rank) + player.getName() + " " + toDonorRankTag(donorRank) + ChatColor.RESET);
+				if (luckPermsRank == null) {
+					player.setDisplayName(toRankTag(rank) + player.getName() + " " + toDonorRankTag(donorRank) + ChatColor.RESET);
+				} else {
+					player.setDisplayName(toRankTag(rank) + luckyPrefix + rankColour + player.getName() + " " + toDonorRankTag(donorRank) + ChatColor.RESET);
+				}
 			}
 		}
 		player.setPlayerListName(player.getDisplayName());
@@ -655,13 +681,29 @@ public class Link$ {
 	public static String getFlashPlayerDisplayName(OfflinePlayer player) {
 		String rank = getRank(player.getUniqueId());
 		String donorRank = getDonorRank(player.getUniqueId());
+		String luckPermsRank = getLuckPermsRank(player);
+		String luckyPrefix = ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + luckPermsRank + ChatColor.DARK_GREEN + "] ";
+		String rankColour = toRankTag(rank).substring(toRankTag(rank).lastIndexOf("] ") + 2);
+		String donorRankColour = toRankTag(donorRank).substring(toRankTag(donorRank).lastIndexOf("] ") + 2);
 		if (donorRank.equals("default")) {
-			return toRankTag(rank) + player.getName() + ChatColor.RESET;
+			if (luckPermsRank == null) {
+				return toRankTag(rank) + player.getName() + ChatColor.RESET;
+			} else {
+				return toRankTag(rank) + luckyPrefix + rankColour + player.getName() + ChatColor.RESET;
+			}
 		} else {
 			if (rank.equals("default")) {
-				return toRankTag(donorRank) + player.getName() + ChatColor.RESET;
+				if (luckPermsRank == null) {
+					return toRankTag(donorRank) + player.getName() + ChatColor.RESET;
+				} else {
+					return toRankTag(donorRank) + luckyPrefix + donorRankColour + player.getName() + ChatColor.RESET;
+				}
 			} else {
-				return toRankTag(rank) + player.getName() + " " + toDonorRankTag(donorRank) + ChatColor.RESET;
+				if (luckPermsRank == null) {
+					return toRankTag(rank) + player.getName() + " " + toDonorRankTag(donorRank) + ChatColor.RESET;
+				} else {
+					return toRankTag(rank) + luckyPrefix + rankColour + player.getName() + " " + toDonorRankTag(donorRank) + ChatColor.RESET;
+				}
 			}
 		}
 	}
@@ -672,13 +714,29 @@ public class Link$ {
 			id = UUID.fromString(CraftGo.Player.getUUID(playerName, true));
 		String rank = getRank(id);
 		String donorRank = getDonorRank(id);
+		String luckPermsRank = getLuckPermsRank(CraftGo.Player.getOfflinePlayer(id));
+		String luckyPrefix = ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + luckPermsRank + ChatColor.DARK_GREEN + "] ";
+		String rankColour = toRankTag(rank).substring(toRankTag(rank).lastIndexOf("] ") + 2);
+		String donorRankColour = toRankTag(donorRank).substring(toRankTag(donorRank).lastIndexOf("] ") + 2);
 		if (donorRank.equals("default")) {
-			return toRankTag(rank) + playerName + ChatColor.RESET;
+			if (luckPermsRank == null) {
+				return toRankTag(rank) + playerName + ChatColor.RESET;
+			} else {
+				return toRankTag(rank) + luckyPrefix + rankColour + playerName + ChatColor.RESET;
+			}
 		} else {
 			if (rank.equals("default")) {
-				return toRankTag(donorRank) + playerName + ChatColor.RESET;
+				if (luckPermsRank == null) {
+					return toRankTag(donorRank) + playerName + ChatColor.RESET;
+				} else {
+					return toRankTag(donorRank) + luckyPrefix + donorRankColour + playerName + ChatColor.RESET;
+				}
 			} else {
-				return toRankTag(rank) + playerName + " " + toDonorRankTag(donorRank) + ChatColor.RESET;
+				if (luckPermsRank == null) {
+					return toRankTag(rank) + playerName + " " + toDonorRankTag(donorRank) + ChatColor.RESET;
+				} else {
+					return toRankTag(rank) + luckyPrefix + rankColour + playerName + " " + toDonorRankTag(donorRank) + ChatColor.RESET;
+				}
 			}
 		}
 	}
