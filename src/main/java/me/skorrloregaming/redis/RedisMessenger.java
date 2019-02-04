@@ -29,7 +29,7 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 	private boolean connectToRedis() {
 		instance = this;
 		LinkServer.getPlugin().getLogger().info("Connecting to Redis..");
-		String hostname = LinkServer.getPlugin().getConfig().getString("settings.redis.hostname", "localhost");
+		String hostname = LinkServer.getPlugin().getConfig().getString("settings.redis.hostname", LinkServer.getPlugin().getConfig().getString("settings.redis.hostname", "localhost"));
 		int port = LinkServer.getPlugin().getConfig().getInt("settings.redis.port", 6379);
 		String password = LinkServer.getPlugin().getConfig().getString("settings.redis.password");
 		JedisPoolConfig poolConfig = new JedisPoolConfig();
