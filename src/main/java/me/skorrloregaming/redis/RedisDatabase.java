@@ -7,6 +7,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import java.util.Optional;
+import java.util.Set;
 
 public class RedisDatabase {
 
@@ -61,8 +62,12 @@ public class RedisDatabase {
 		close();
 	}
 
-	public String set(String table, String key, String value) {
-		return jedis.set(table + "." + key, value);
+	public void set(String table, String key, String value) {
+		if (value == null) {
+			jedis.del(table + "." + key);
+		} else {
+			jedis.set(table + "." + key, value);
+		}
 	}
 
 	public String getString(String table, String key) {
