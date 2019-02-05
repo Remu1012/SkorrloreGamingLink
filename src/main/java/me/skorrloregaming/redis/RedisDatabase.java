@@ -67,6 +67,6 @@ public class RedisDatabase {
 
 	public boolean contains(String table, String key) {
 		String response;
-		return (response = getString(table, key)) == null || response.length() == 0;
+		return !((response = getString(table, key)) == null || response.length() == 0);
 	}
 }
