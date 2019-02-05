@@ -71,13 +71,14 @@ public class LinkServer extends JavaPlugin implements Listener {
 		getConfig().options().copyDefaults(true);
 		saveConfig();
 		reload();
+		String dbHostname = getConfig().getString("settings.database.hostname", "localhost");
 		String dbUsername = getConfig().getString("settings.database.username", "username");
 		String dbPassword = getConfig().getString("settings.database.password", "password");
 		serverName = getConfig().getString("settings.serverName", "lobby");
 		discordChannel = getConfig().getString("settings.discordChannel", "SERVER_CHAT");
 		barApi = new CraftGo.BarApi();
 		barApi.onEnable();
-		sqlDatabase = new SQLDatabase("localhost", dbUsername, dbPassword);
+		sqlDatabase = new SQLDatabase(dbHostname, dbUsername, dbPassword);
 		playtimeManager = new PlaytimeManager();
 		anticheat = new AntiCheat();
 		anticheat.register();
