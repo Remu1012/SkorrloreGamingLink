@@ -568,10 +568,10 @@ public class Link$ {
 
 	public static String getRank(UUID id) {
 		if (isRankingEnabled()) {
-			if (LinkServer.getSqlDatabase().contains("rank", id.toString())) {
-				return LinkServer.getSqlDatabase().getString("rank", id.toString());
+			if (LinkServer.getRedisDatabase().contains("rank", id.toString())) {
+				return LinkServer.getRedisDatabase().getString("rank", id.toString());
 			} else {
-				LinkServer.getSqlDatabase().set("rank", id.toString(), validRanks.get(0));
+				LinkServer.getRedisDatabase().set("rank", id.toString(), validRanks.get(0));
 				return validRanks.get(0);
 			}
 		} else {
@@ -585,10 +585,10 @@ public class Link$ {
 
 	public static String getDonorRank(UUID id) {
 		if (isRankingEnabled()) {
-			if (LinkServer.getSqlDatabase().contains("donorRank", id.toString())) {
-				return LinkServer.getSqlDatabase().getString("donorRank", id.toString());
+			if (LinkServer.getRedisDatabase().contains("donorRank", id.toString())) {
+				return LinkServer.getRedisDatabase().getString("donorRank", id.toString());
 			} else {
-				LinkServer.getSqlDatabase().set("donorRank", id.toString(), validDonorRanks.get(0));
+				LinkServer.getRedisDatabase().set("donorRank", id.toString(), validDonorRanks.get(0));
 				return validDonorRanks.get(0);
 			}
 		} else {

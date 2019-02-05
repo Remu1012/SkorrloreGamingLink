@@ -44,8 +44,8 @@ public class PlaytimeManager {
 						if (!(newCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR))) {
 							handle_QuitEvent(player);
 							for (int day = 0; day <= 365; day++) {
-								if (LinkServer.getSqlDatabase().contains("playtime.dayOfYear." + day, player.getUniqueId().toString()))
-									LinkServer.getSqlDatabase().set("playtime.dayOfYear." + day, player.getUniqueId().toString(), null);
+								if (LinkServer.getRedisDatabase().contains("playtime.dayOfYear." + day, player.getUniqueId().toString()))
+									LinkServer.getRedisDatabase().set("playtime.dayOfYear." + day, player.getUniqueId().toString(), null);
 							}
 							handle_JoinEvent(player);
 						}
@@ -56,16 +56,16 @@ public class PlaytimeManager {
 	}
 
 	public long getStoredPlayerPlaytime(OfflinePlayer player) {
-		if (LinkServer.getSqlDatabase().contains("playtime.total", player.getUniqueId().toString())) {
-			return Long.parseLong(LinkServer.getSqlDatabase().getString("playtime.total", player.getUniqueId().toString()));
+		if (LinkServer.getRedisDatabase().contains("playtime.total", player.getUniqueId().toString())) {
+			return Long.parseLong(LinkServer.getRedisDatabase().getString("playtime.total", player.getUniqueId().toString()));
 		} else {
 			return 0;
 		}
 	}
 
 	public long getStoredPlayerPlaytime(OfflinePlayer player, int dayOfYear) {
-		if (LinkServer.getSqlDatabase().contains("playtime.dayOfYear." + dayOfYear, player.getUniqueId().toString())) {
-			return Long.parseLong(LinkServer.getSqlDatabase().getString("playtime.dayOfYear." + dayOfYear, player.getUniqueId().toString()));
+		if (LinkServer.getRedisDatabase().contains("playtime.dayOfYear." + dayOfYear, player.getUniqueId().toString())) {
+			return Long.parseLong(LinkServer.getRedisDatabase().getString("playtime.dayOfYear." + dayOfYear, player.getUniqueId().toString()));
 		} else {
 			return 0;
 		}
@@ -80,8 +80,8 @@ public class PlaytimeManager {
 	}
 
 	public int getLastKnownDayOfYear(OfflinePlayer player) {
-		if (LinkServer.getSqlDatabase().contains("playtime.lastKnownDayOfYear", player.getUniqueId().toString())) {
-			return Integer.parseInt(LinkServer.getSqlDatabase().getString("playtime.lastKnownDayOfYear", player.getUniqueId().toString()));
+		if (LinkServer.getRedisDatabase().contains("playtime.lastKnownDayOfYear", player.getUniqueId().toString())) {
+			return Integer.parseInt(LinkServer.getRedisDatabase().getString("playtime.lastKnownDayOfYear", player.getUniqueId().toString()));
 		} else {
 			return 0;
 		}
@@ -99,11 +99,11 @@ public class PlaytimeManager {
 		int dayOfYear = calendar.get(Calendar.DAY_OF_YEAR);
 		if (dayOfYear < getLastKnownDayOfYear(player)) {
 			for (int day = 0; day <= 365; day++) {
-				if (LinkServer.getSqlDatabase().contains("playtime.dayOfYear." + day, player.getUniqueId().toString()))
-					LinkServer.getSqlDatabase().set("playtime.dayOfYear." + day, player.getUniqueId().toString(), null);
+				if (LinkServer.getRedisDatabase().contains("playtime.dayOfYear." + day, player.getUniqueId().toString()))
+					LinkServer.getRedisDatabase().set("playtime.dayOfYear." + day, player.getUniqueId().toString(), null);
 			}
 		}
-		LinkServer.getSqlDatabase().set("playtime.lastKnownDayOfYear", player.getUniqueId().toString(), dayOfYear + "");
+		LinkServer.getRedisDatabase().set("playtime.lastKnownDayOfYear", player.getUniqueId().toString(), dayOfYear + "");
 		playtimeTracker.put(player.getUniqueId(), seconds);
 	}
 
@@ -118,10 +118,10 @@ public class PlaytimeManager {
 			long secondsPassed = (System.currentTimeMillis() / 1000l) - playtimeTracker.get(player.getUniqueId()).longValue();
 			playtimeTracker.remove(player.getUniqueId());
 			long currentTimeInSeconds = getStoredPlayerPlaytime(player);
-			LinkServer.getSqlDatabase().set("playtime.total", player.getUniqueId().toString(), currentTimeInSeconds + secondsPassed + "");
+			LinkServer.getRedisDatabase().set("playtime.total", player.getUniqueId().toString(), currentTimeInSeconds + secondsPassed + "");
 			long currentTimeInSecondsDay = getStoredPlayerPlaytime(player, dayOfYear);
-			LinkServer.getSqlDatabase().set("playtime.dayOfYear." + dayOfYear, player.getUniqueId().toString(), currentTimeInSecondsDay + secondsPassed + "");
-			LinkServer.getSqlDatabase().set("playtime.lastKnownDayOfYear", player.getUniqueId().toString(), dayOfYear + "");
+			LinkServer.getRedisDatabase().set("playtime.dayOfYear." + dayOfYear, player.getUniqueId().toString(), currentTimeInSecondsDay + secondsPassed + "");
+			LinkServer.getRedisDatabase().set("playtime.lastKnownDayOfYear", player.getUniqueId().toString(), dayOfYear + "");
 		}
 	}
 

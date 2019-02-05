@@ -4,8 +4,8 @@ import me.skorrloregaming.commands.*;
 import me.skorrloregaming.hooks.ProtocolSupport_Listener;
 import me.skorrloregaming.redis.MapBuilder;
 import me.skorrloregaming.redis.RedisChannel;
+import me.skorrloregaming.redis.RedisDatabase;
 import me.skorrloregaming.redis.RedisMessenger;
-import me.skorrloregaming.mysql.SQLDatabase;
 import me.skorrloregaming.runnable.AutoBroadcaster;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
@@ -40,7 +40,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	private static CraftGo.BarApi barApi = null;
 
-	private static SQLDatabase sqlDatabase;
+	private static RedisDatabase redisDatabase;
 
 	private static PlaytimeManager playtimeManager;
 
@@ -71,14 +71,12 @@ public class LinkServer extends JavaPlugin implements Listener {
 		getConfig().options().copyDefaults(true);
 		saveConfig();
 		reload();
-		String dbHostname = getConfig().getString("settings.database.hostname", "localhost");
-		String dbUsername = getConfig().getString("settings.database.username", "username");
-		String dbPassword = getConfig().getString("settings.database.password", "password");
 		serverName = getConfig().getString("settings.serverName", "lobby");
 		discordChannel = getConfig().getString("settings.discordChannel", "SERVER_CHAT");
 		barApi = new CraftGo.BarApi();
 		barApi.onEnable();
-		sqlDatabase = new SQLDatabase(dbHostname, dbUsername, dbPassword);
+		redisDatabase = new RedisDatabase();
+		redisDatabase.register();
 		playtimeManager = new PlaytimeManager();
 		anticheat = new AntiCheat();
 		anticheat.register();
@@ -150,8 +148,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 	@Override
 	public void onDisable() {
 		barApi.onDisable();
-		sqlDatabase.close();
-		redisMessenger.unregister();
+		redisDatabase.unregister();
 	}
 
 	public void reload() {
@@ -223,8 +220,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 		return barApi;
 	}
 
-	public static SQLDatabase getSqlDatabase() {
-		return sqlDatabase;
+	public static RedisDatabase getRedisDatabase() {
+		return redisDatabase;
 	}
 
 	public static PlaytimeManager getPlaytimeManager() {

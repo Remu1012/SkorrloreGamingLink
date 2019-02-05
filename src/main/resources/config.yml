@@ -1,8 +1,4 @@
 settings:
-    database:
-        hostname: 'localhost'
-        username: username
-        password: password
     bungeecord: true
     essentials: false
     subServer: true

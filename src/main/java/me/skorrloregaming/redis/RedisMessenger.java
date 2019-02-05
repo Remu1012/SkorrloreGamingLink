@@ -20,66 +20,22 @@ import java.util.Optional;
 
 public class RedisMessenger extends JedisPubSub implements Listener {
 
-	private Optional<JedisPool> jedisPool = Optional.empty();
-
 	private final Gson gson = new Gson();
 
-	private RedisMessenger instance;
-
-	private boolean connectToRedis() {
-		instance = this;
-		LinkServer.getPlugin().getLogger().info("Connecting to Redis..");
-		String hostname = LinkServer.getPlugin().getConfig().getString("settings.redis.hostname", LinkServer.getPlugin().getConfig().getString("settings.redis.hostname", "localhost"));
-		int port = LinkServer.getPlugin().getConfig().getInt("settings.redis.port", 6379);
-		String password = LinkServer.getPlugin().getConfig().getString("settings.redis.password");
-		JedisPoolConfig poolConfig = new JedisPoolConfig();
-		poolConfig.setMaxWaitMillis(10 * 1000);
-		if (password == null || password.equals("")) {
-			jedisPool = Optional.ofNullable(new JedisPool(poolConfig, hostname, port, 0));
-		} else {
-			jedisPool = Optional.ofNullable(new JedisPool(poolConfig, hostname, port, 0, password));
-		}
-		return jedisPool.isPresent();
-	}
-
-	private RedisMessenger getInstance() {
-		return instance;
-	}
-
-	private boolean close() {
-		if (jedisPool.isPresent()) {
-			jedisPool.get().destroy();
-			return true;
-		}
-		return false;
-	}
-
-	public Optional<JedisPool> getPool() {
-		if (!jedisPool.isPresent() || jedisPool.get().isClosed()) {
-			connectToRedis();
-		}
-		return jedisPool;
-	}
-
 	public void register() {
-		connectToRedis();
-		LinkServer.getPlugin().getLogger().info("Connected to Redis!");
+		final RedisMessenger instance = this;
 		Bukkit.getScheduler().runTaskAsynchronously(LinkServer.getPlugin(), new Runnable() {
 
 			@Override
 			public void run() {
-				getPool().ifPresent((pool) -> {
+				LinkServer.getRedisDatabase().getPool().ifPresent((pool) -> {
 					try (Jedis jedis = pool.getResource()) {
-						jedis.subscribe(getInstance(), "slgn:chat");
+						jedis.subscribe(instance, "slgn:chat");
 					} catch (Exception ex) {
 					}
 				});
 			}
 		});
-	}
-
-	public void unregister() {
-		close();
 	}
 
 	public void broadcast(RedisChannel channel, Map<String, String> message) {
@@ -92,7 +48,7 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 				for (Map.Entry<String, String> entry : message.entrySet()) {
 					obj.addProperty(entry.getKey(), entry.getValue());
 				}
-				getPool().ifPresent((pool) -> {
+				LinkServer.getRedisDatabase().getPool().ifPresent((pool) -> {
 					try (Jedis jedis = pool.getResource()) {
 						jedis.publish("slgn:" + channel.toString().toLowerCase(), obj.toString());
 					} catch (Exception ex) {
