@@ -2,6 +2,7 @@ package me.skorrloregaming.redis;
 
 import com.google.gson.Gson;
 import me.skorrloregaming.LinkServer;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
@@ -12,6 +13,8 @@ public class RedisDatabase {
 	private Optional<JedisPool> jedisPool = Optional.empty();
 
 	private RedisDatabase instance;
+
+	private Jedis jedis;
 
 	private boolean connectToRedis() {
 		instance = this;
@@ -50,6 +53,7 @@ public class RedisDatabase {
 
 	public void register() {
 		connectToRedis();
+		jedis = jedisPool.get().getResource();
 		LinkServer.getPlugin().getLogger().info("Connected to Redis!");
 	}
 
@@ -58,11 +62,11 @@ public class RedisDatabase {
 	}
 
 	public String set(String table, String key, String value) {
-		return jedisPool.get().getResource().set(table + "." + key, value);
+		return jedis.set(table + "." + key, value);
 	}
 
 	public String getString(String table, String key) {
-		return jedisPool.get().getResource().get(table + "." + key);
+		return jedis.get(table + "." + key);
 	}
 
 	public boolean contains(String table, String key) {
