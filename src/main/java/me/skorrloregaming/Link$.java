@@ -566,6 +566,12 @@ public class Link$ {
 		return "";
 	}
 
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
 	public static String getRank(UUID id) {
 		if (isRankingEnabled()) {
 			if (LinkServer.getRedisDatabase().contains("rank", id.toString())) {
@@ -579,10 +585,22 @@ public class Link$ {
 		}
 	}
 
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
 	public static String getRank(Player player) {
 		return getRank(player.getUniqueId());
 	}
 
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
 	public static String getDonorRank(UUID id) {
 		if (isRankingEnabled()) {
 			if (LinkServer.getRedisDatabase().contains("donorRank", id.toString())) {
@@ -596,10 +614,22 @@ public class Link$ {
 		}
 	}
 
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
 	public static String getDonorRank(Player player) {
 		return getDonorRank(player.getUniqueId());
 	}
 
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
 	public static int getRankId(UUID id) {
 		String rank = getRank(id);
 		if (rank.equals("default") || !isRankingEnabled())
@@ -615,10 +645,22 @@ public class Link$ {
 		return -100;
 	}
 
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
 	public static int getRankId(Player player) {
 		return getRankId(player.getUniqueId());
 	}
 
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
 	public static int getDonorRankId(UUID id) {
 		String rank = getDonorRank(id);
 		if (rank.equals("default") || rank.equals("youtube") || !isRankingEnabled())
@@ -634,6 +676,12 @@ public class Link$ {
 		return -100;
 	}
 
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
 	public static int getDonorRankId(Player player) {
 		return getDonorRankId(player.getUniqueId());
 	}
@@ -647,6 +695,12 @@ public class Link$ {
 		}
 	}
 
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
 	public static void flashPlayerDisplayName(Player player) {
 		String rank = getRank(player);
 		String donorRank = getDonorRank(player);
@@ -678,6 +732,12 @@ public class Link$ {
 		player.setPlayerListName(player.getDisplayName());
 	}
 
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
 	public static String getFlashPlayerDisplayName(OfflinePlayer player) {
 		String rank = getRank(player.getUniqueId());
 		String donorRank = getDonorRank(player.getUniqueId());
@@ -708,6 +768,12 @@ public class Link$ {
 		}
 	}
 
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
 	public static String getFlashPlayerDisplayName(String playerName) {
 		UUID id = UUID.nameUUIDFromBytes(("OfflinePlayer:" + playerName).getBytes());
 		if (Bukkit.getOnlineMode())

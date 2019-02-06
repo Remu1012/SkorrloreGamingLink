@@ -78,6 +78,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 		redisDatabase = new RedisDatabase();
 		redisDatabase.register();
 		playtimeManager = new PlaytimeManager();
+		playtimeManager.register();
 		anticheat = new AntiCheat();
 		anticheat.register();
 		if (getConfig().getBoolean("settings.bungeecord", false)) {
@@ -149,6 +150,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 	public void onDisable() {
 		barApi.onDisable();
 		redisDatabase.unregister();
+		playtimeManager.unregister();
 	}
 
 	public void reload() {

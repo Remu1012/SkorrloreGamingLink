@@ -1,5 +1,6 @@
 package me.skorrloregaming;
 
+import me.skorrloregaming.redis.RedisDatabase;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -7,19 +8,90 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class PlaytimeManager {
 	public ConcurrentMap<UUID, Long> playtimeTracker = new ConcurrentHashMap<>();
+
+	private Optional<JedisPool> jedisPool = Optional.empty();
+
+	private PlaytimeManager instance;
+
+	private Jedis jedis;
+
+	private boolean connectToRedis() {
+		instance = this;
+		LinkServer.getPlugin().getLogger().info("Connecting to Redis..");
+		String hostname = LinkServer.getPlugin().getConfig().getString("settings.redis.hostname", LinkServer.getPlugin().getConfig().getString("settings.redis.hostname", "localhost"));
+		int port = LinkServer.getPlugin().getConfig().getInt("settings.redis.port", 6379);
+		String password = LinkServer.getPlugin().getConfig().getString("settings.redis.password");
+		JedisPoolConfig poolConfig = new JedisPoolConfig();
+		poolConfig.setMaxWaitMillis(10 * 1000);
+		if (password == null || password.equals("")) {
+			jedisPool = Optional.ofNullable(new JedisPool(poolConfig, hostname, port, 0));
+		} else {
+			jedisPool = Optional.ofNullable(new JedisPool(poolConfig, hostname, port, 0, password));
+		}
+		return jedisPool.isPresent();
+	}
+
+	private PlaytimeManager getInstance() {
+		return instance;
+	}
+
+	private boolean close() {
+		if (jedisPool.isPresent()) {
+			jedisPool.get().destroy();
+			return true;
+		}
+		return false;
+	}
+
+	public Optional<JedisPool> getPool() {
+		if (!jedisPool.isPresent() || jedisPool.get().isClosed()) {
+			connectToRedis();
+		}
+		return jedisPool;
+	}
+
+	public void register() {
+		connectToRedis();
+		jedis = jedisPool.get().getResource();
+		LinkServer.getPlugin().getLogger().info("Connected to Redis!");
+	}
+
+	public void unregister() {
+		close();
+	}
+
+	public void set(String table, String key, String value) {
+		if (value == null) {
+			jedis.del(table + "." + key);
+		} else {
+			jedis.set(table + "." + key, value);
+		}
+	}
+
+	public String getString(String table, String key) {
+		return jedis.get(table + "." + key);
+	}
+
+	public boolean contains(String table, String key) {
+		String response;
+		return !((response = getString(table, key)) == null || response.length() == 0);
+	}
 
 	public PlaytimeManager() {
 		Bukkit.getScheduler().runTaskTimer(LinkServer.getPlugin(), new Runnable() {
@@ -44,8 +116,8 @@ public class PlaytimeManager {
 						if (!(newCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR))) {
 							handle_QuitEvent(player);
 							for (int day = 0; day <= 365; day++) {
-								if (LinkServer.getRedisDatabase().contains("playtime.dayOfYear." + day, player.getUniqueId().toString()))
-									LinkServer.getRedisDatabase().set("playtime.dayOfYear." + day, player.getUniqueId().toString(), null);
+								if (contains("playtime.dayOfYear." + day, player.getUniqueId().toString()))
+									set("playtime.dayOfYear." + day, player.getUniqueId().toString(), null);
 							}
 							handle_JoinEvent(player);
 						}
@@ -56,16 +128,16 @@ public class PlaytimeManager {
 	}
 
 	public long getStoredPlayerPlaytime(OfflinePlayer player) {
-		if (LinkServer.getRedisDatabase().contains("playtime.total", player.getUniqueId().toString())) {
-			return Long.parseLong(LinkServer.getRedisDatabase().getString("playtime.total", player.getUniqueId().toString()));
+		if (contains("playtime.total", player.getUniqueId().toString())) {
+			return Long.parseLong(getString("playtime.total", player.getUniqueId().toString()));
 		} else {
 			return 0;
 		}
 	}
 
 	public long getStoredPlayerPlaytime(OfflinePlayer player, int dayOfYear) {
-		if (LinkServer.getRedisDatabase().contains("playtime.dayOfYear." + dayOfYear, player.getUniqueId().toString())) {
-			return Long.parseLong(LinkServer.getRedisDatabase().getString("playtime.dayOfYear." + dayOfYear, player.getUniqueId().toString()));
+		if (contains("playtime.dayOfYear." + dayOfYear, player.getUniqueId().toString())) {
+			return Long.parseLong(getString("playtime.dayOfYear." + dayOfYear, player.getUniqueId().toString()));
 		} else {
 			return 0;
 		}
@@ -80,8 +152,8 @@ public class PlaytimeManager {
 	}
 
 	public int getLastKnownDayOfYear(OfflinePlayer player) {
-		if (LinkServer.getRedisDatabase().contains("playtime.lastKnownDayOfYear", player.getUniqueId().toString())) {
-			return Integer.parseInt(LinkServer.getRedisDatabase().getString("playtime.lastKnownDayOfYear", player.getUniqueId().toString()));
+		if (contains("playtime.lastKnownDayOfYear", player.getUniqueId().toString())) {
+			return Integer.parseInt(getString("playtime.lastKnownDayOfYear", player.getUniqueId().toString()));
 		} else {
 			return 0;
 		}
@@ -99,11 +171,11 @@ public class PlaytimeManager {
 		int dayOfYear = calendar.get(Calendar.DAY_OF_YEAR);
 		if (dayOfYear < getLastKnownDayOfYear(player)) {
 			for (int day = 0; day <= 365; day++) {
-				if (LinkServer.getRedisDatabase().contains("playtime.dayOfYear." + day, player.getUniqueId().toString()))
-					LinkServer.getRedisDatabase().set("playtime.dayOfYear." + day, player.getUniqueId().toString(), null);
+				if (contains("playtime.dayOfYear." + day, player.getUniqueId().toString()))
+					set("playtime.dayOfYear." + day, player.getUniqueId().toString(), null);
 			}
 		}
-		LinkServer.getRedisDatabase().set("playtime.lastKnownDayOfYear", player.getUniqueId().toString(), dayOfYear + "");
+		set("playtime.lastKnownDayOfYear", player.getUniqueId().toString(), dayOfYear + "");
 		playtimeTracker.put(player.getUniqueId(), seconds);
 	}
 
@@ -118,10 +190,10 @@ public class PlaytimeManager {
 			long secondsPassed = (System.currentTimeMillis() / 1000l) - playtimeTracker.get(player.getUniqueId()).longValue();
 			playtimeTracker.remove(player.getUniqueId());
 			long currentTimeInSeconds = getStoredPlayerPlaytime(player);
-			LinkServer.getRedisDatabase().set("playtime.total", player.getUniqueId().toString(), currentTimeInSeconds + secondsPassed + "");
+			set("playtime.total", player.getUniqueId().toString(), currentTimeInSeconds + secondsPassed + "");
 			long currentTimeInSecondsDay = getStoredPlayerPlaytime(player, dayOfYear);
-			LinkServer.getRedisDatabase().set("playtime.dayOfYear." + dayOfYear, player.getUniqueId().toString(), currentTimeInSecondsDay + secondsPassed + "");
-			LinkServer.getRedisDatabase().set("playtime.lastKnownDayOfYear", player.getUniqueId().toString(), dayOfYear + "");
+			set("playtime.dayOfYear." + dayOfYear, player.getUniqueId().toString(), currentTimeInSecondsDay + secondsPassed + "");
+			set("playtime.lastKnownDayOfYear", player.getUniqueId().toString(), dayOfYear + "");
 		}
 	}
 
@@ -185,9 +257,9 @@ public class PlaytimeManager {
 				Inventory inventory = Bukkit.createInventory(null, invSize, ChatColor.RESET + " " + Link$.formatMonthId(monthId) + " of " + targetPlayer.getName());
 				String day7total = ChatColor.RESET + Link$.formatTime((int) totalTimePlayedInSeconds) + " during the past 7 days.";
 				ItemStack viewPrevious = Link$.createMaterial(Material.EMERALD, "View previous month");
-				viewPrevious = Link$.addLore(viewPrevious, new String[] { day7total });
+				viewPrevious = Link$.addLore(viewPrevious, new String[]{day7total});
 				ItemStack viewFollowing = Link$.createMaterial(Material.EMERALD, "View following month");
-				viewFollowing = Link$.addLore(viewFollowing, new String[] { day7total });
+				viewFollowing = Link$.addLore(viewFollowing, new String[]{day7total});
 				inventory.setItem(18, viewPrevious);
 				inventory.setItem(26, viewFollowing);
 				for (int i = 0; i < inventory.getSize(); i++) {

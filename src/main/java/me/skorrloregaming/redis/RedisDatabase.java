@@ -2,6 +2,7 @@ package me.skorrloregaming.redis;
 
 import com.google.gson.Gson;
 import me.skorrloregaming.LinkServer;
+import org.bukkit.Bukkit;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -53,16 +54,34 @@ public class RedisDatabase {
 	}
 
 	public void register() {
-		connectToRedis();
-		jedis = jedisPool.get().getResource();
-		LinkServer.getPlugin().getLogger().info("Connected to Redis!");
+		Bukkit.getScheduler().runTask(LinkServer.getPlugin(), new Runnable() {
+
+			@Override
+			public void run() {
+				connectToRedis();
+				jedis = jedisPool.get().getResource();
+				LinkServer.getPlugin().getLogger().info("Connected to Redis!");
+			}
+		});
 	}
 
 	public void unregister() {
-		close();
+		Bukkit.getScheduler().runTask(LinkServer.getPlugin(), new Runnable() {
+
+			@Override
+			public void run() {
+				close();
+			}
+		});
 	}
 
-	public void set(String table, String key, String value) {
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
+	public void setUnsafe(String table, String key, String value) {
 		if (value == null) {
 			jedis.del(table + "." + key);
 		} else {
@@ -70,12 +89,44 @@ public class RedisDatabase {
 		}
 	}
 
+	public void set(String table, String key, String value) {
+		Bukkit.getScheduler().runTask(LinkServer.getPlugin(), new Runnable() {
+
+			@Override
+			public void run() {
+				setUnsafe(table, key, value);
+			}
+		});
+	}
+
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
 	public String getString(String table, String key) {
 		return jedis.get(table + "." + key);
 	}
 
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
 	public boolean contains(String table, String key) {
 		String response;
 		return !((response = getString(table, key)) == null || response.length() == 0);
+	}
+
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
+	public Set<String> getKeys(String pattern) {
+		return jedis.keys(pattern);
 	}
 }
