@@ -25,15 +25,13 @@ import java.util.function.Function;
 public class ProtocolSupport_Listener implements Listener {
 
 	public boolean register() {
-		if (Bukkit.getServer().getOnlineMode())
-			return false;
-		LinkServer.getPlugin().getServer().getPluginManager().registerEvents(this, LinkServer.getPlugin());
 		this.<Chest>registerRemapEntryForAllStates(Arrays.asList(Material.CHEST, Material.TRAPPED_CHEST), o -> {
 			Chest chest = (Chest) createBlockData(o.getMaterial());
 			chest.setWaterlogged(false);
 			chest.setFacing(o.getFacing());
 			return chest;
 		}, ProtocolVersionsHelper.BEFORE_1_13);
+		LinkServer.getPlugin().getServer().getPluginManager().registerEvents(this, LinkServer.getPlugin());
 		return true;
 	}
 
@@ -91,7 +89,8 @@ public class ProtocolSupport_Listener implements Listener {
 	public void onPlayerProfileComplete(PlayerProfileCompleteEvent event) {
 		String playerName = event.getConnection().getProfile().getOriginalName();
 		UUID offlineUUID = UUID.nameUUIDFromBytes(("OfflinePlayer:" + event.getConnection().getProfile().getName()).getBytes());
-		event.setForcedUUID(offlineUUID);
+		if (!LinkServer.getPlugin().getConfig().getBoolean("settings.bungeecord", false))
+			event.setForcedUUID(offlineUUID);
 		String path = "sync." + event.getConnection().getProfile().getOriginalName();
 		if (LinkServer.getPlugin().getConfig().contains(path)) {
 			if (LinkServer.getPlugin().getConfig().getBoolean(path + ".est", false)) {
