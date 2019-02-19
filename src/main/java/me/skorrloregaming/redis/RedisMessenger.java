@@ -82,20 +82,23 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			boolean hit = false;
 			UUID uid = null;
-			if (origin.equals("CONSOLE") || (hit = ((uid = Link$.getIgnoredPlayer(player.getUniqueId())) != null))) {
-				if (hit) {
-					if (!uid.toString().equals(origin)) {
-						if (json) {
-							CraftGo.Player.sendJson(player, message);
-						} else
-							player.sendMessage(message);
-					}
-				} else {
+			if (!origin.equals("CONSOLE")) {
+				uid = Link$.getIgnoredPlayer(player.getUniqueId());
+				if (uid != null)
+					hit = true;
+			}
+			if (hit) {
+				if (!uid.toString().equals(origin)) {
 					if (json) {
 						CraftGo.Player.sendJson(player, message);
 					} else
 						player.sendMessage(message);
 				}
+			} else {
+				if (json) {
+					CraftGo.Player.sendJson(player, message);
+				} else
+					player.sendMessage(message);
 			}
 		}
 	}
