@@ -26,7 +26,7 @@ public class Link$ {
 	public static String modernMsgPrefix = ChatColor.BOLD + "\u00BB" + " ";
 
 	public static List<String> validRanks = Arrays.asList(new String[]{"default", "founder", "owner", "manager", "admin", "moderator", "helper", "developer", "builder"});
-	public static List<String> validDonorRanks = Arrays.asList(new String[]{"default", "youtube", "donator", "redstone", "obsidian", "bedrock"});
+	public static List<String> validDonorRanks = Arrays.asList(new String[]{"default", "youtube", "twitch", "donator", "redstone", "obsidian", "bedrock"});
 
 	public static void playLackPermissionMessage(CommandSender player) {
 		player.sendMessage(Legacy.tag + ChatColor.RED + "You do not have permission to use this command.");
@@ -525,6 +525,8 @@ public class Link$ {
 			return ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "Donator" + ChatColor.DARK_GREEN + "] " + ChatColor.GRAY;
 		if (rank.equals("youtube"))
 			return ChatColor.GRAY + "[" + ChatColor.RED + "You" + ChatColor.WHITE + "Tube" + ChatColor.GRAY + "] " + ChatColor.RESET;
+		if (rank.equals("twitch"))
+			return ChatColor.LIGHT_PURPLE + "[" + ChatColor.WHITE + "Twitch" + ChatColor.LIGHT_PURPLE + "] " + ChatColor.RESET;
 		if (rank.equals("redstone"))
 			return ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "Redstone" + ChatColor.DARK_GREEN + "] " + ChatColor.GRAY;
 		if (rank.equals("obsidian"))
@@ -557,6 +559,8 @@ public class Link$ {
 			return "donator";
 		if (rank.equals("youtube"))
 			return "youtube";
+		if (rank.equals("twitch"))
+			return "twitch";
 		if (rank.equals("redstone"))
 			return "redstone";
 		if (rank.equals("obsidian"))
@@ -663,7 +667,7 @@ public class Link$ {
 	@Deprecated
 	public static int getDonorRankId(UUID id) {
 		String rank = getDonorRank(id);
-		if (rank.equals("default") || rank.equals("youtube") || !isRankingEnabled())
+		if (rank.equals("default") || rank.equals("youtube") || rank.equals("twitch") || !isRankingEnabled())
 			return -1;
 		if (rank.equals("bedrock"))
 			return -5;

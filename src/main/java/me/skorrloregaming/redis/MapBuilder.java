@@ -11,6 +11,8 @@ public class MapBuilder {
 	private String discordChannel = "n/a";
 	private boolean json = false;
 	private String message;
+	private int range = -2;
+	private boolean consoleOnly = false;
 
 	public MapBuilder server(String serverName) {
 		this.serverName = serverName;
@@ -32,6 +34,16 @@ public class MapBuilder {
 		return this;
 	}
 
+	public MapBuilder range(int range) {
+		this.range = range;
+		return this;
+	}
+
+	public MapBuilder consoleOnly(boolean consoleOnly) {
+		this.consoleOnly = consoleOnly;
+		return this;
+	}
+
 	public Map<String, String> build() {
 		Map<String, String> map = new HashMap<String, String>();
 		if (serverName == null)
@@ -42,6 +54,8 @@ public class MapBuilder {
 		map.put("discordChannel", discordChannel);
 		map.put("json", json + "");
 		map.put("message", message);
+		map.put("range", range + "");
+		map.put("consoleOnly", consoleOnly + "");
 		return map;
 	}
 

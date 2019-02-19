@@ -5,18 +5,14 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import me.skorrloregaming.CraftGo;
 import me.skorrloregaming.LinkServer;
-import net.md_5.bungee.chat.ComponentSerializer;
+import me.skorrloregaming.Logger;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
 
 import java.util.Map;
-import java.util.Optional;
 
 public class RedisMessenger extends JedisPubSub implements Listener {
 
@@ -76,13 +72,48 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 				String serverName = obj.get("serverName").getAsString();
 				boolean json = obj.get("json").getAsBoolean();
 				String message = obj.get("message").getAsString();
+				int range = obj.get("range").getAsInt();
+				boolean consoleOnly = obj.get("consoleOnly").getAsBoolean();
+				String playerName = obj.get("playerName").getAsString();
 				if (serverName.equals(LinkServer.getServerName())) {
-					if (LinkServer.getPlugin().getConfig().getBoolean("settings.subServer", false))
-						bukkitBroadcast(message, json);
-				} else
-					bukkitBroadcast(message, json);
+					if (LinkServer.getPlugin().getConfig().getBoolean("settings.subServer", false)) {
+						if (playerName.equals("ALL")) {
+							if (range == -2) {
+								bukkitBroadcast(message, json);
+							} else {
+								Logger.info(message, consoleOnly, range);
+							}
+						} else {
+							Player player = Bukkit.getPlayerExact(playerName);
+							if (player != null) {
+								if (json) {
+									CraftGo.Player.sendJson(player, message);
+								} else {
+									player.sendMessage(message);
+								}
+							}
+						}
+					}
+				} else {
+					if (playerName.equals("ALL")) {
+						if (range == -2) {
+							bukkitBroadcast(message, json);
+						} else {
+							Logger.info(message, consoleOnly, range);
+						}
+					} else {
+						Player player = Bukkit.getPlayerExact(playerName);
+						if (player != null) {
+							if (json) {
+								CraftGo.Player.sendJson(player, message);
+							} else {
+								player.sendMessage(message);
+							}
+						}
+					}
+				}
 			}
 		}
-	}
 
+	}
 }
