@@ -55,9 +55,6 @@ commands:
     description: Change someones rank
   setdonorrank:
     description: Change someones donor rank
-  ignore:
-    description: Ignore the specified player until the next server update
-    alaises: ig
   tell:
     description: Message a player on the server
     aliases: [msg, message, w, pm]

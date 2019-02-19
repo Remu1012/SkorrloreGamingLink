@@ -50,17 +50,8 @@ public class TellCmd implements CommandExecutor {
 			} else {
 				message = LinkServer.getInstance().getAntiCheat().processAntiSwear(player, message);
 				player.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "me" + ChatColor.WHITE + " " + '\u00BB' + " " + ChatColor.RED + targetPlayer.getName() + ChatColor.WHITE + "] " + message);
-				UUID uid;
-				if ((uid = Link$.getIgnoredPlayer(player.getUniqueId())) != null) {
-					Player existingIgnore = Bukkit.getPlayer(uid);
-					if (!existingIgnore.getName().toString().equals(player.getName().toString())) {
-						targetPlayer.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + player.getName() + ChatColor.WHITE + " " + '\u00BB' + " " + ChatColor.RED + "me" + ChatColor.WHITE + "] " + message);
-						targetPlayer.playSound(targetPlayer.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
-					}
-				} else {
-					targetPlayer.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + player.getName() + ChatColor.WHITE + " " + '\u00BB' + " " + ChatColor.RED + "me" + ChatColor.WHITE + "] " + message);
-					targetPlayer.playSound(targetPlayer.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
-				}
+				targetPlayer.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + player.getName() + ChatColor.WHITE + " " + '\u00BB' + " " + ChatColor.RED + "me" + ChatColor.WHITE + "] " + message);
+				targetPlayer.playSound(targetPlayer.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
 				LinkServer.getMessageRequests().put(player.getName(), targetPlayer.getName());
 				LinkServer.getMessageRequests().put(targetPlayer.getName(), player.getName());
 				LinkServer.getInstance().getRedisMessenger().broadcast(RedisChannel.CHAT, new MapBuilder().message(message).range(0).notify(true).send(false).build());

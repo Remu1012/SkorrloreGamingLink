@@ -118,7 +118,6 @@ public class LinkServer extends JavaPlugin implements Listener {
 		getCommand("buy").setExecutor(new BuyCmd());
 		getCommand("setrank").setExecutor(new SetRankCmd());
 		getCommand("setdonorrank").setExecutor(new SetDonorRankCmd());
-		getCommand("ignore").setExecutor(new IgnoreCmd());
 		getCommand("reply").setExecutor(new ReplyCmd());
 		getCommand("tell").setExecutor(new TellCmd());
 		Bukkit.getScheduler().runTaskTimer(this, new AutoBroadcaster(), 6000L, 12000L);
@@ -128,8 +127,6 @@ public class LinkServer extends JavaPlugin implements Listener {
 				for (Player player : Bukkit.getOnlinePlayers()) {
 					if (getPlugin().getConfig().getBoolean("settings.essentials", false))
 						player.setPlayerListName(player.getDisplayName());
-					if (getPlugin().getConfig().getBoolean("settings.subServer", false))
-						Link$.flashPlayerDisplayName(player);
 					String path = "config." + player.getUniqueId().toString();
 					boolean subscribed = Boolean.parseBoolean(getPlugin().getConfig().getString(path + ".subscribed", "true"));
 					if (subscribed) {
