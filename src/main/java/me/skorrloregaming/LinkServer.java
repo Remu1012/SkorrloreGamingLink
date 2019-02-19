@@ -64,6 +64,10 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	private static ConcurrentMap<UUID, Integer> barApiTitleIndex = new ConcurrentHashMap<>();
 
+	private static ConcurrentMap<String, String> messageRequests = new ConcurrentHashMap<>();
+
+	private static ConcurrentMap<UUID, UUID> ignoredPlayers = new ConcurrentHashMap<>();
+
 	@Override
 	public void onEnable() {
 		this.instance = this;
@@ -115,6 +119,9 @@ public class LinkServer extends JavaPlugin implements Listener {
 		getCommand("buy").setExecutor(new BuyCmd());
 		getCommand("setrank").setExecutor(new SetRankCmd());
 		getCommand("setdonorrank").setExecutor(new SetDonorRankCmd());
+		getCommand("ignore").setExecutor(new IgnoreCmd());
+		getCommand("reply").setExecutor(new ReplyCmd());
+		getCommand("tell").setExecutor(new TellCmd());
 		Bukkit.getScheduler().runTaskTimer(this, new AutoBroadcaster(), 6000L, 12000L);
 		Bukkit.getScheduler().runTaskTimer(getPlugin(), new Runnable() {
 			@Override
@@ -288,6 +295,14 @@ public class LinkServer extends JavaPlugin implements Listener {
 		return barApiTitleIndex;
 	}
 
+	public static ConcurrentMap<String, String> getMessageRequests() {
+		return messageRequests;
+	}
+
+	public static ConcurrentMap<UUID, UUID> getIgnoredPlayers() {
+		return ignoredPlayers;
+	}
+
 	public static LinkServer getInstance() {
 		return instance;
 	}
@@ -348,7 +363,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 			if (getConfig().getBoolean("settings.subServer", false)) {
 				String processedMessage = getAntiCheat().processAntiSwear(player, event.getMessage());
 				String msg = ChatColor.GRAY + "[" + ChatColor.WHITE + getServerName().toLowerCase() + ChatColor.GRAY + "] " + ChatColor.RESET + player.getDisplayName() + ChatColor.RESET + " " + '\u00BB' + " " + processedMessage;
-				redisMessenger.broadcast(RedisChannel.CHAT, new MapBuilder().message(msg).build());
+				redisMessenger.broadcast(RedisChannel.CHAT, new MapBuilder().message(msg).origin(player.getUniqueId().toString()).build());
 				if (Link$.isPrefixedRankingEnabled()) {
 					String rankName = WordUtils.capitalize(Link$.toRankDisplayName(Link$.getRank(player)));
 					if (rankName.equals("Youtube"))

@@ -9,6 +9,7 @@ import me.skorrloregaming.LinkServer;
 import me.skorrloregaming.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import redis.clients.jedis.Jedis;
@@ -16,6 +17,7 @@ import redis.clients.jedis.JedisPubSub;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class RedisMessenger extends JedisPubSub implements Listener {
 
@@ -76,13 +78,24 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 		});
 	}
 
-	private void bukkitBroadcast(String message, boolean json) {
-		if (json) {
-			for (Player player : Bukkit.getOnlinePlayers()) {
-				CraftGo.Player.sendJson(player, message);
+	private void bukkitBroadcast(String origin, String message, boolean json) {
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			boolean hit = false;
+			if (origin.equals("CONSOLE") || (hit = LinkServer.getIgnoredPlayers().containsKey(player.getUniqueId()))) {
+				if (hit) {
+					if (!LinkServer.getIgnoredPlayers().get(player.getUniqueId().toString()).toString().equals(origin)) {
+						if (json) {
+							CraftGo.Player.sendJson(player, message);
+						} else
+							player.sendMessage(message);
+					}
+				} else {
+					if (json) {
+						CraftGo.Player.sendJson(player, message);
+					} else
+						player.sendMessage(message);
+				}
 			}
-		} else {
-			Bukkit.broadcastMessage(message);
 		}
 	}
 
@@ -99,18 +112,31 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 						String message = obj.get("message").getAsString();
 						int range = obj.get("range").getAsInt();
 						boolean consoleOnly = obj.get("consoleOnly").getAsBoolean();
+						String origin = obj.get("origin").getAsString();
 						String playerName = obj.get("playerName").getAsString();
+						boolean notify = obj.get("notify").getAsBoolean();
+						boolean send = obj.get("send").getAsBoolean();
 						if (serverName.equals(LinkServer.getServerName())) {
 							if (LinkServer.getPlugin().getConfig().getBoolean("settings.subServer", false)) {
 								if (playerName.equals("ALL")) {
 									if (range == -2) {
-										bukkitBroadcast(message, json);
+										bukkitBroadcast(origin, message, json);
 									} else {
-										Logger.info(message, consoleOnly, range);
+										if (send) {
+											Logger.info(message, consoleOnly, range, notify);
+										} else if (notify) {
+											for (Player otherPlayer : Bukkit.getOnlinePlayers()) {
+												if (range == -1 || Link$.getRankId(otherPlayer) >= range) {
+													otherPlayer.playSound(otherPlayer.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
+												}
+											}
+										}
 									}
 								} else {
 									Player player = Bukkit.getPlayerExact(playerName);
 									if (player != null) {
+										if (notify)
+											player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
 										if (json) {
 											CraftGo.Player.sendJson(player, message);
 										} else {
@@ -122,13 +148,23 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 						} else {
 							if (playerName.equals("ALL")) {
 								if (range == -2) {
-									bukkitBroadcast(message, json);
+									bukkitBroadcast(origin, message, json);
 								} else {
-									Logger.info(message, consoleOnly, range);
+									if (send) {
+										Logger.info(message, consoleOnly, range, notify);
+									} else if (notify) {
+										for (Player otherPlayer : Bukkit.getOnlinePlayers()) {
+											if (range == -1 || Link$.getRankId(otherPlayer) >= range) {
+												otherPlayer.playSound(otherPlayer.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
+											}
+										}
+									}
 								}
 							} else {
 								Player player = Bukkit.getPlayerExact(playerName);
 								if (player != null) {
+									if (notify)
+										player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
 									if (json) {
 										CraftGo.Player.sendJson(player, message);
 									} else {

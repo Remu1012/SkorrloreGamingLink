@@ -13,7 +13,10 @@ public class MapBuilder {
 	private String message;
 	private int range = -2;
 	private boolean consoleOnly = false;
-	private String playerName;
+	private String origin = "CONSOLE";
+	private String playerName = "ALL";
+	private boolean notify = false;
+	private boolean send = false;
 
 	public MapBuilder server(String serverName) {
 		this.serverName = serverName;
@@ -45,8 +48,23 @@ public class MapBuilder {
 		return this;
 	}
 
+	public MapBuilder origin(String origin) {
+		this.origin = origin;
+		return this;
+	}
+
 	public MapBuilder playerName(String playerName) {
 		this.playerName = playerName;
+		return this;
+	}
+
+	public MapBuilder notify(boolean notify) {
+		this.notify = notify;
+		return this;
+	}
+
+	public MapBuilder send(boolean send) {
+		this.send = send;
 		return this;
 	}
 
@@ -63,7 +81,10 @@ public class MapBuilder {
 		map.put("message", message);
 		map.put("range", range + "");
 		map.put("consoleOnly", consoleOnly + "");
+		map.put("origin", origin);
 		map.put("playerName", playerName);
+		map.put("notify", notify + "");
+		map.put("send", send + "");
 		return map;
 	}
 

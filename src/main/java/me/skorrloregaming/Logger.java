@@ -2,28 +2,39 @@ package me.skorrloregaming;
 
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 public class Logger {
 	public static final int LOG_DEFAULT_RANKID = 0;
 
-	private static void broadcast(String msg, int minRankId) {
+	private static void broadcast(String msg, int minRankId, boolean notify) {
 		for (Player otherPlayer : Bukkit.getOnlinePlayers()) {
 			if (minRankId == -1 || Link$.getRankId(otherPlayer) >= minRankId) {
+				if (notify)
+					otherPlayer.playSound(otherPlayer.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
 				otherPlayer.sendMessage(Link$.italicGray + msg);
 			}
 		}
 	}
 
+	private static void broadcast(String msg, int minRankId) {
+		broadcast(msg, minRankId, false);
+	}
+
 	private static void broadcast(String msg) {
-		broadcast(msg, LOG_DEFAULT_RANKID);
+		broadcast(msg, LOG_DEFAULT_RANKID, false);
+	}
+
+	public static void info(String msg, boolean consoleOnly, int minRankId, boolean notify) {
+		Bukkit.getLogger().info(ChatColor.stripColor(msg));
+		if (!consoleOnly) {
+			broadcast(msg, LOG_DEFAULT_RANKID, notify);
+		}
 	}
 
 	public static void info(String msg, boolean consoleOnly, int minRankId) {
-		Bukkit.getLogger().info(ChatColor.stripColor(msg));
-		if (!consoleOnly) {
-			broadcast(msg);
-		}
+		info(msg, consoleOnly, minRankId, false);
 	}
 
 	public static void info(String msg, boolean consoleOnly) {
