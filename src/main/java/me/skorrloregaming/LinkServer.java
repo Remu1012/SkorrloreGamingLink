@@ -28,6 +28,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -332,6 +333,13 @@ public class LinkServer extends JavaPlugin implements Listener {
 				message = message.replace(player.getName(), "**" + player.getName() + "**");
 				redisMessenger.broadcast(RedisChannel.DISCORD, new MapBuilder().message(message).channel(discordChannel).build());
 				event.setQuitMessage(null);
+			}
+		}
+		if (messageRequests.containsKey(player.getUniqueId()))
+			messageRequests.remove(player.getUniqueId());
+		for (Map.Entry<String, String> id : messageRequests.entrySet()) {
+			if (id.getValue().equals(player.getUniqueId())) {
+				messageRequests.remove(id.getKey());
 			}
 		}
 	}
