@@ -4,14 +4,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import me.skorrloregaming.CraftGo;
+import me.skorrloregaming.Link$;
 import me.skorrloregaming.LinkServer;
 import me.skorrloregaming.Logger;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
+import java.util.List;
 import java.util.Map;
 
 public class RedisMessenger extends JedisPubSub implements Listener {
@@ -20,7 +23,7 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 
 	public void register() {
 		final RedisMessenger instance = this;
-		Bukkit.getScheduler().runTaskAsynchronously(LinkServer.getPlugin(), new Runnable() {
+		Bukkit.getScheduler().runTask(LinkServer.getPlugin(), new Runnable() {
 
 			@Override
 			public void run() {
@@ -34,8 +37,27 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 		});
 	}
 
+	public void ping(RedisChannel channel, String ping, String playerName) {
+		Bukkit.getScheduler().runTask(LinkServer.getPlugin(), new Runnable() {
+
+			@Override
+			public void run() {
+				Gson gson = new GsonBuilder().create();
+				JsonObject obj = new JsonObject();
+				obj.addProperty("ping", ping);
+				obj.addProperty("playerName", playerName);
+				LinkServer.getRedisDatabase().getPool().ifPresent((pool) -> {
+					try (Jedis jedis = pool.getResource()) {
+						jedis.publish("slgn:" + channel.toString().toLowerCase(), obj.toString());
+					} catch (Exception ex) {
+					}
+				});
+			}
+		});
+	}
+
 	public void broadcast(RedisChannel channel, Map<String, String> message) {
-		Bukkit.getScheduler().runTaskAsynchronously(LinkServer.getPlugin(), new Runnable() {
+		Bukkit.getScheduler().runTask(LinkServer.getPlugin(), new Runnable() {
 
 			@Override
 			public void run() {
@@ -69,48 +91,61 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 		if (channel.equalsIgnoreCase("slgn:chat")) {
 			JsonObject obj = gson.fromJson(request, JsonObject.class);
 			if (obj != null) {
-				String serverName = obj.get("serverName").getAsString();
-				boolean json = obj.get("json").getAsBoolean();
-				String message = obj.get("message").getAsString();
-				int range = obj.get("range").getAsInt();
-				boolean consoleOnly = obj.get("consoleOnly").getAsBoolean();
-				String playerName = obj.get("playerName").getAsString();
-				if (serverName.equals(LinkServer.getServerName())) {
-					if (LinkServer.getPlugin().getConfig().getBoolean("settings.subServer", false)) {
-						if (playerName.equals("ALL")) {
-							if (range == -2) {
-								bukkitBroadcast(message, json);
-							} else {
-								Logger.info(message, consoleOnly, range);
+				String ping = obj.get("ping").getAsString();
+				switch (ping) {
+					case "MESSAGE":
+						String serverName = obj.get("serverName").getAsString();
+						boolean json = obj.get("json").getAsBoolean();
+						String message = obj.get("message").getAsString();
+						int range = obj.get("range").getAsInt();
+						boolean consoleOnly = obj.get("consoleOnly").getAsBoolean();
+						String playerName = obj.get("playerName").getAsString();
+						if (serverName.equals(LinkServer.getServerName())) {
+							if (LinkServer.getPlugin().getConfig().getBoolean("settings.subServer", false)) {
+								if (playerName.equals("ALL")) {
+									if (range == -2) {
+										bukkitBroadcast(message, json);
+									} else {
+										Logger.info(message, consoleOnly, range);
+									}
+								} else {
+									Player player = Bukkit.getPlayerExact(playerName);
+									if (player != null) {
+										if (json) {
+											CraftGo.Player.sendJson(player, message);
+										} else {
+											player.sendMessage(message);
+										}
+									}
+								}
 							}
 						} else {
-							Player player = Bukkit.getPlayerExact(playerName);
-							if (player != null) {
-								if (json) {
-									CraftGo.Player.sendJson(player, message);
+							if (playerName.equals("ALL")) {
+								if (range == -2) {
+									bukkitBroadcast(message, json);
 								} else {
-									player.sendMessage(message);
+									Logger.info(message, consoleOnly, range);
+								}
+							} else {
+								Player player = Bukkit.getPlayerExact(playerName);
+								if (player != null) {
+									if (json) {
+										CraftGo.Player.sendJson(player, message);
+									} else {
+										player.sendMessage(message);
+									}
 								}
 							}
 						}
-					}
-				} else {
-					if (playerName.equals("ALL")) {
-						if (range == -2) {
-							bukkitBroadcast(message, json);
-						} else {
-							Logger.info(message, consoleOnly, range);
+						break;
+					case "RANK_UPDATE":
+						OfflinePlayer targetPlayer = CraftGo.Player.getOfflinePlayer(obj.get("playerName").getAsString());
+						if (Link$.isPrefixedRankingEnabled() && targetPlayer.isOnline()) {
+							Link$.flashPlayerDisplayName(targetPlayer.getPlayer());
 						}
-					} else {
-						Player player = Bukkit.getPlayerExact(playerName);
-						if (player != null) {
-							if (json) {
-								CraftGo.Player.sendJson(player, message);
-							} else {
-								player.sendMessage(message);
-							}
-						}
-					}
+						break;
+					default:
+						break;
 				}
 			}
 		}

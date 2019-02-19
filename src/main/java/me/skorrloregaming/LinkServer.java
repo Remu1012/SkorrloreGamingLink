@@ -113,6 +113,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 		getCommand("dispose").setExecutor(new DisposeCmd());
 		getCommand("ping").setExecutor(new PingCmd());
 		getCommand("buy").setExecutor(new BuyCmd());
+		getCommand("setrank").setExecutor(new SetRankCmd());
+		getCommand("setdonorrank").setExecutor(new SetDonorRankCmd());
 		Bukkit.getScheduler().runTaskTimer(this, new AutoBroadcaster(), 6000L, 12000L);
 		Bukkit.getScheduler().runTaskTimer(getPlugin(), new Runnable() {
 			@Override

@@ -5,49 +5,53 @@ description: Plugin to provide basic functionality to a server
 api-version: 1.13
 softdepend: [LuckPerms]
 commands:
-    unsubscribe:
-        description: Unsubscribe from news header and auto broadcaster
-    debug:
-        description: Enable or disable debugging of this plugin
-    logger:
-        description: Enable or disable in-game anticheat logging
-        aliases: logging
-    playtime-report:
-        description: Gets the range of stored playtime information for a player
-        aliases: [playtime-report, ptreport, ptr]
-    playtime:
-        description: Retrieves the play time for a given player
-        aliases: pt
-    desync:
-        description: Unlink your alternative account from your primary account
-        aliases: [unsync, desync-account, desyncaccount, unsync-account, unsyncaccount, unsynca, desynca, delink, delink-account, delinka, unlinka, unlink, unlink-account]
-    sync:
-        description: Link your alternative account with your primary account
-        aliases: [sync-account, syncaccount, synca, link-account, linkaccount, link, linka]
-    discord:
-        description: Sends the url of our discord to the sender
-    address:
-        description: Displays the server ip address to the sender
-        aliases: ip
-    buy:
-        description: Access the buycraft store
-        aliases: [store, purchase, donate]
-    workbench:
-        description: Your virtual crafting table
-        aliases: [wb, craft]
-    dispose:
-        description: Trash your most useless items
-        aliases: trash
-    modifications:
-        description: Link to our vanilla modifications wiki
-        aliases: mods
-    ping:
-        description: Find your connection latency
-        aliases: latency
-    rules:
-        description: View the servers' defined rules
-    vote:
-        description: View a list of available vote portals
-    website:
-        description: Link to our minecraft server website
-        aliases: [store, forums, forum, apply]
+  unsubscribe:
+    description: Unsubscribe from news header and auto broadcaster
+  debug:
+    description: Enable or disable debugging of this plugin
+  logger:
+    description: Enable or disable in-game anticheat logging
+    aliases: logging
+  playtime-report:
+    description: Gets the range of stored playtime information for a player
+    aliases: [playtime-report, ptreport, ptr]
+  playtime:
+    description: Retrieves the play time for a given player
+    aliases: pt
+  desync:
+    description: Unlink your alternative account from your primary account
+    aliases: [unsync, desync-account, desyncaccount, unsync-account, unsyncaccount, unsynca, desynca, delink, delink-account, delinka, unlinka, unlink, unlink-account]
+  sync:
+    description: Link your alternative account with your primary account
+    aliases: [sync-account, syncaccount, synca, link-account, linkaccount, link, linka]
+  discord:
+    description: Sends the url of our discord to the sender
+  address:
+    description: Displays the server ip address to the sender
+    aliases: ip
+  buy:
+    description: Access the buycraft store
+    aliases: [store, purchase, donate]
+  workbench:
+    description: Your virtual crafting table
+    aliases: [wb, craft]
+  dispose:
+    description: Trash your most useless items
+    aliases: trash
+  modifications:
+    description: Link to our vanilla modifications wiki
+    aliases: mods
+  ping:
+    description: Find your connection latency
+    aliases: latency
+  rules:
+    description: View the servers' defined rules
+  vote:
+    description: View a list of available vote portals
+  website:
+    description: Link to our minecraft server website
+    aliases: [store, forums, forum, apply]
+  setrank:
+    description: Change someones rank
+  setdonorrank:
+    description: Change someones donor rank

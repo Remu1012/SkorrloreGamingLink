@@ -56,6 +56,7 @@ public class MapBuilder {
 			serverName = LinkServer.getServerName();
 		if (message == null)
 			throw new IllegalArgumentException();
+		map.put("ping", "MESSAGE");
 		map.put("serverName", serverName);
 		map.put("discordChannel", discordChannel);
 		map.put("json", json + "");
