@@ -13,6 +13,7 @@ public class MapBuilder {
 	private String message;
 	private int range = -2;
 	private boolean consoleOnly = false;
+	private String playerName;
 
 	public MapBuilder server(String serverName) {
 		this.serverName = serverName;
@@ -44,6 +45,11 @@ public class MapBuilder {
 		return this;
 	}
 
+	public MapBuilder playerName(String playerName) {
+		this.playerName = playerName;
+		return this;
+	}
+
 	public Map<String, String> build() {
 		Map<String, String> map = new HashMap<String, String>();
 		if (serverName == null)
@@ -56,6 +62,7 @@ public class MapBuilder {
 		map.put("message", message);
 		map.put("range", range + "");
 		map.put("consoleOnly", consoleOnly + "");
+		map.put("playerName", playerName);
 		return map;
 	}
 
