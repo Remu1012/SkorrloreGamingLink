@@ -67,7 +67,6 @@ public class AntiCheat implements Listener {
 		swearWords.add("whore");
 		swearWords.add("twat");
 		swearWords.add("arse");
-		swearWords.add("ass");
 		swearWords.add("horny");
 		swearWords.add("aroused");
 		swearWords.add("hentai");
@@ -81,16 +80,13 @@ public class AntiCheat implements Listener {
 		swearWords.add("bastard");
 		swearWords.add("anal");
 		swearWords.add("wanker");
-		swearWords.add("rape");
 		swearWords.add("rapist");
 		swearWords.add("cock");
 		swearWords.add("titt");
-		swearWords.add("piss");
 		swearWords.add("spunk");
 		swearWords.add("milf");
 		swearWords.add("anus");
 		swearWords.add("dafuq");
-		swearWords.add("damn");
 	}
 
 	public boolean isEntityNearGround(Entity entity) {
