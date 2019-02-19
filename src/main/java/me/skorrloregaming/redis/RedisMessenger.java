@@ -25,7 +25,7 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 
 	public void register() {
 		final RedisMessenger instance = this;
-		Bukkit.getScheduler().runTask(LinkServer.getPlugin(), new Runnable() {
+		Bukkit.getScheduler().runTaskAsynchronously(LinkServer.getPlugin(), new Runnable() {
 
 			@Override
 			public void run() {
@@ -40,7 +40,7 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 	}
 
 	public void ping(RedisChannel channel, String ping, String playerName) {
-		Bukkit.getScheduler().runTask(LinkServer.getPlugin(), new Runnable() {
+		Bukkit.getScheduler().runTaskAsynchronously(LinkServer.getPlugin(), new Runnable() {
 
 			@Override
 			public void run() {
@@ -59,7 +59,7 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 	}
 
 	public void broadcast(RedisChannel channel, Map<String, String> message) {
-		Bukkit.getScheduler().runTask(LinkServer.getPlugin(), new Runnable() {
+		Bukkit.getScheduler().runTaskAsynchronously(LinkServer.getPlugin(), new Runnable() {
 
 			@Override
 			public void run() {
@@ -81,9 +81,10 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 	private void bukkitBroadcast(String origin, String message, boolean json) {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			boolean hit = false;
-			if (origin.equals("CONSOLE") || (hit = LinkServer.getIgnoredPlayers().containsKey(player.getUniqueId()))) {
+			UUID uid = null;
+			if (origin.equals("CONSOLE") || (hit = ((uid = Link$.getIgnoredPlayer(player.getUniqueId())) != null))) {
 				if (hit) {
-					if (!LinkServer.getIgnoredPlayers().get(player.getUniqueId().toString()).toString().equals(origin)) {
+					if (!uid.toString().equals(origin)) {
 						if (json) {
 							CraftGo.Player.sendJson(player, message);
 						} else
@@ -135,6 +136,15 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 								} else {
 									Player player = Bukkit.getPlayerExact(playerName);
 									if (player != null) {
+										boolean hit = false;
+										UUID uid = null;
+										if (origin.equals("CONSOLE") || (hit = ((uid = Link$.getIgnoredPlayer(player.getUniqueId())) != null))) {
+											if (hit) {
+												if (uid.toString().equals(origin)) {
+													return;
+												}
+											}
+										}
 										if (notify)
 											player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
 										if (json) {
@@ -163,6 +173,15 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 							} else {
 								Player player = Bukkit.getPlayerExact(playerName);
 								if (player != null) {
+									boolean hit = false;
+									UUID uid = null;
+									if (origin.equals("CONSOLE") || (hit = ((uid = Link$.getIgnoredPlayer(player.getUniqueId())) != null))) {
+										if (hit) {
+											if (uid.toString().equals(origin)) {
+												return;
+											}
+										}
+									}
 									if (notify)
 										player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
 									if (json) {

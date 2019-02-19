@@ -66,8 +66,6 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	private static ConcurrentMap<String, String> messageRequests = new ConcurrentHashMap<>();
 
-	private static ConcurrentMap<UUID, UUID> ignoredPlayers = new ConcurrentHashMap<>();
-
 	@Override
 	public void onEnable() {
 		this.instance = this;
@@ -297,10 +295,6 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	public static ConcurrentMap<String, String> getMessageRequests() {
 		return messageRequests;
-	}
-
-	public static ConcurrentMap<UUID, UUID> getIgnoredPlayers() {
-		return ignoredPlayers;
 	}
 
 	public static LinkServer getInstance() {

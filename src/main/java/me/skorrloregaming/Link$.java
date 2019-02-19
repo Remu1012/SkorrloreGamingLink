@@ -595,6 +595,37 @@ public class Link$ {
 	 * @deprecated Make sure this is executed on the main thread
 	 */
 	@Deprecated
+	public static UUID getIgnoredPlayer(UUID uuid) {
+		if (isRankingEnabled()) {
+			if (LinkServer.getRedisDatabase().contains("ignoredPlayer", uuid.toString())) {
+				return UUID.fromString(LinkServer.getRedisDatabase().getString("ignoredPlayer", uuid.toString()));
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
+	public static void setIgnoredPlayer(UUID uuid, UUID targetUUID) {
+		if (isRankingEnabled())
+			if (LinkServer.getRedisDatabase().contains("ignoredPlayer", uuid.toString())) {
+				LinkServer.getRedisDatabase().set("ignoredPlayer", uuid.toString(), targetUUID.toString());
+			}
+	}
+
+	/**
+	 * This can cause issues if executed async
+	 *
+	 * @deprecated Make sure this is executed on the main thread
+	 */
+	@Deprecated
 	public static String getRank(Player player) {
 		return getRank(player.getUniqueId());
 	}

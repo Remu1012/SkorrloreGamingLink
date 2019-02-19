@@ -9,6 +9,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.UUID;
+
 public class IgnoreCmd implements CommandExecutor {
 
 	@Override
@@ -24,15 +26,16 @@ public class IgnoreCmd implements CommandExecutor {
 				player.sendMessage(Link$.Legacy.tag + ChatColor.RED + "Failed. " + ChatColor.GRAY + "The specified player could not be found.");
 				return true;
 			}
-			if (LinkServer.getIgnoredPlayers().containsKey(player.getUniqueId())) {
-				Player existingIgnore = Bukkit.getPlayer(LinkServer.getIgnoredPlayers().get(player.getUniqueId()));
+			UUID uid;
+			if ((uid = Link$.getIgnoredPlayer(player.getUniqueId())) != null) {
+				Player existingIgnore = Bukkit.getPlayer(uid);
 				if (existingIgnore.getName().toString().equals(targetPlayer.getName().toString())) {
-					LinkServer.getIgnoredPlayers().remove(player.getUniqueId(), targetPlayer.getUniqueId());
+					Link$.setIgnoredPlayer(player.getUniqueId(), targetPlayer.getUniqueId());
 					player.sendMessage(Link$.Legacy.tag + ChatColor.RED + "Success. " + ChatColor.GRAY + "You are no longer ignoring the specified player. If you had an issue while using the /ignore feature, please let the server administrators know about the issue.");
 					return true;
 				}
 			}
-			LinkServer.getIgnoredPlayers().put(player.getUniqueId(), targetPlayer.getUniqueId());
+			Link$.setIgnoredPlayer(player.getUniqueId(), targetPlayer.getUniqueId());
 			player.sendMessage(Link$.Legacy.tag + ChatColor.RED + "Success. " + ChatColor.GRAY + "You are now ignoring the specified player. This will only last until the next server update and/or restart.");
 		}
 		return true;

@@ -13,6 +13,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class TellCmd implements CommandExecutor {
 
@@ -49,8 +50,9 @@ public class TellCmd implements CommandExecutor {
 			} else {
 				message = LinkServer.getInstance().getAntiCheat().processAntiSwear(player, message);
 				player.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "me" + ChatColor.WHITE + " " + '\u00BB' + " " + ChatColor.RED + targetPlayer.getName() + ChatColor.WHITE + "] " + message);
-				if (LinkServer.getIgnoredPlayers().containsKey(targetPlayer.getUniqueId())) {
-					Player existingIgnore = Bukkit.getPlayer(LinkServer.getIgnoredPlayers().get(targetPlayer.getUniqueId()));
+				UUID uid;
+				if ((uid = Link$.getIgnoredPlayer(player.getUniqueId())) != null) {
+					Player existingIgnore = Bukkit.getPlayer(uid);
 					if (!existingIgnore.getName().toString().equals(player.getName().toString())) {
 						targetPlayer.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + player.getName() + ChatColor.WHITE + " " + '\u00BB' + " " + ChatColor.RED + "me" + ChatColor.WHITE + "] " + message);
 						targetPlayer.playSound(targetPlayer.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 1);
