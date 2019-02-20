@@ -40,7 +40,7 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 	}
 
 	public void ping(RedisChannel channel, String ping, String playerName) {
-		Bukkit.getScheduler().runTaskAsynchronously(LinkServer.getPlugin(), new Runnable() {
+		Bukkit.getScheduler().runTask(LinkServer.getPlugin(), new Runnable() {
 
 			@Override
 			public void run() {
@@ -59,7 +59,7 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 	}
 
 	public void broadcast(RedisChannel channel, Map<String, String> message) {
-		Bukkit.getScheduler().runTaskAsynchronously(LinkServer.getPlugin(), new Runnable() {
+		Bukkit.getScheduler().runTask(LinkServer.getPlugin(), new Runnable() {
 
 			@Override
 			public void run() {
