@@ -44,7 +44,7 @@ public class ReplyCmd implements CommandExecutor {
 			if (targetPlayer == null) {
 				player.sendMessage(Link$.Legacy.tag + ChatColor.RED + "Warning. " + ChatColor.GRAY + "The specified player is not on this server.");
 				String rawForwardMessage = ChatColor.WHITE + "[" + ChatColor.RED + player.getName() + ChatColor.WHITE + " " + '\u00BB' + " " + ChatColor.RED + "me" + ChatColor.WHITE + "] " + message;
-				player.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "me" + ChatColor.WHITE + " " + '\u00BB' + " " + ChatColor.RED + targetPlayer.getName() + ChatColor.WHITE + "] " + message);
+				player.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "me" + ChatColor.WHITE + " " + '\u00BB' + " " + ChatColor.RED + LinkServer.getMessageRequests().get(player.getUniqueId()) + ChatColor.WHITE + "] " + message);
 				Map<String, String> forwardMessage = new MapBuilder().message(rawForwardMessage).playerName(LinkServer.getMessageRequests().get(player.getUniqueId())).origin(player.getName()).notify(true).build();
 				LinkServer.getInstance().getRedisMessenger().broadcast(RedisChannel.CHAT, forwardMessage);
 				LinkServer.getMessageRequests().put(player.getName(), LinkServer.getMessageRequests().get(player.getUniqueId()));
