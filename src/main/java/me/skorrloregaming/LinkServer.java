@@ -161,7 +161,11 @@ public class LinkServer extends JavaPlugin implements Listener {
 	@Override
 	public void onDisable() {
 		barApi.onDisable();
-		redisDatabase.unregister();
+		if (getConfig().getBoolean("settings.bungeecord", true)) {
+			if (getConfig().getBoolean("settings.subServer", false)) {
+				redisDatabase.unregister();
+			}
+		}
 		playtimeManager.unregister();
 	}
 

@@ -110,8 +110,8 @@ public class RedisDatabase {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			if (callback) {
-				Logger.severe("Clearing jedis pipeline due to error encountered during use..");
 				pipeline.clear();
+				Logger.severe("Clearing jedis pipeline due to error encountered during use..");
 				response = getString(table, key, false);
 			}
 		}
@@ -149,8 +149,9 @@ public class RedisDatabase {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			if (callback) {
-				Logger.severe("Clearing jedis pipeline due to error encountered during use..");
 				pipeline.clear();
+				Logger.severe("Clearing jedis pipeline due to error encountered during use..");
+
 				response = getKeys(pattern, false);
 			}
 		}
