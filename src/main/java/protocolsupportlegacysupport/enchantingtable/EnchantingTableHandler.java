@@ -20,7 +20,7 @@ public class EnchantingTableHandler implements Listener {
 		Bukkit.getPluginManager().registerEvents(this, ProtocolSupportLegacySupport.getInstance().getPlugin());
 	}
 
-	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onInvOpen(InventoryClickEvent event) {
 		Bukkit.getScheduler().scheduleSyncDelayedTask(ProtocolSupportLegacySupport.getInstance().getPlugin(), () -> {
 			Inventory topinv = event.getWhoClicked().getOpenInventory().getTopInventory();
@@ -53,7 +53,7 @@ public class EnchantingTableHandler implements Listener {
 		});
 	}
 
-	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onInvClose(InventoryCloseEvent event) {
 		Inventory topinv = event.getView().getTopInventory();
 		if (!(topinv instanceof EnchantingInventory)) {

@@ -50,8 +50,8 @@ public class BossBarHandler implements Listener {
 			@Override
 			public void onPacketSending(PacketEvent event) {
 				if (
-					(connection.getVersion().getProtocolType() != ProtocolType.PC) ||
-					connection.getVersion().isAfter(ProtocolVersion.MINECRAFT_1_8)
+						(connection.getVersion().getProtocolType() != ProtocolType.PC) ||
+								connection.getVersion().isAfter(ProtocolVersion.MINECRAFT_1_8)
 				) {
 					return;
 				}

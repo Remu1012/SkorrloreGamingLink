@@ -54,7 +54,6 @@ public class ArmorStandData {
 	}
 
 
-
 	private static final boolean isOffsetSet(int value, int offset) {
 		return (value & offset) == offset;
 	}

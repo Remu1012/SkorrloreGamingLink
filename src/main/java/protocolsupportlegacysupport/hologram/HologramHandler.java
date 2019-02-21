@@ -41,8 +41,8 @@ public class HologramHandler implements Listener {
 			@Override
 			public void onPacketSending(PacketEvent event) {
 				if (
-					(connection.getVersion().getProtocolType() != ProtocolType.PC) ||
-					connection.getVersion().isAfter(ProtocolVersion.MINECRAFT_1_7_10)
+						(connection.getVersion().getProtocolType() != ProtocolType.PC) ||
+								connection.getVersion().isAfter(ProtocolVersion.MINECRAFT_1_6_4)
 				) {
 					return;
 				}

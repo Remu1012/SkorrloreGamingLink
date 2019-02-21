@@ -2,10 +2,9 @@ package me.skorrloregaming.redis;
 
 import com.google.gson.Gson;
 import me.skorrloregaming.LinkServer;
+import me.skorrloregaming.Logger;
 import org.bukkit.Bukkit;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.*;
 
 import java.util.Optional;
 import java.util.Set;
@@ -84,8 +83,10 @@ public class RedisDatabase {
 	public void setUnsafe(String table, String key, String value) {
 		if (value == null) {
 			jedis.del(table + "." + key);
+			jedis.sync();
 		} else {
 			jedis.set(table + "." + key, value);
+			jedis.sync();
 		}
 	}
 
@@ -99,6 +100,24 @@ public class RedisDatabase {
 		});
 	}
 
+	private String getString(String table, String key, boolean callback) {
+		Pipeline pipeline = jedis.pipelined();
+		String response = null;
+		try {
+			Response<String> preResponse = pipeline.get(table + "." + key);
+			pipeline.sync();
+			response = preResponse.get();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			if (callback) {
+				Logger.severe("Clearing jedis pipeline due to error encountered during use..");
+				pipeline.clear();
+				response = getString(table, key, false);
+			}
+		}
+		return response;
+	}
+
 	/**
 	 * This can cause issues if executed async
 	 *
@@ -106,7 +125,7 @@ public class RedisDatabase {
 	 */
 	@Deprecated
 	public String getString(String table, String key) {
-		return jedis.get(table + "." + key);
+		return getString(table, key, true);
 	}
 
 	/**
@@ -120,6 +139,24 @@ public class RedisDatabase {
 		return !((response = getString(table, key)) == null || response.length() == 0);
 	}
 
+	private Set<String> getKeys(String pattern, boolean callback) {
+		Pipeline pipeline = jedis.pipelined();
+		Set<String> response = null;
+		try {
+			Response<Set<String>> preResponse = pipeline.keys(pattern);
+			pipeline.sync();
+			response = preResponse.get();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			if (callback) {
+				Logger.severe("Clearing jedis pipeline due to error encountered during use..");
+				pipeline.clear();
+				response = getKeys(pattern, false);
+			}
+		}
+		return response;
+	}
+
 	/**
 	 * This can cause issues if executed async
 	 *
@@ -127,6 +164,6 @@ public class RedisDatabase {
 	 */
 	@Deprecated
 	public Set<String> getKeys(String pattern) {
-		return jedis.keys(pattern);
+		return getKeys(pattern, true);
 	}
 }
