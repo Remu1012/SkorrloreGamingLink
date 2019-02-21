@@ -66,31 +66,26 @@
 			<groupId>com.destroystokyo.paper</groupId>
 			<artifactId>paper-api</artifactId>
 			<version>1.13.2-R0.1-SNAPSHOT</version>
-			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.aadnk</groupId>
+			<artifactId>ProtocolLib</artifactId>
+			<version>6ff6976e85</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.ProtocolSupport</groupId>
 			<artifactId>ProtocolSupport</artifactId>
 			<version>ddbcb5f964</version>
-			<scope>compile</scope>
-			<type>jar</type>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.6</version>
-			<scope>compile</scope>
-			<type>jar</type>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.github.MilkBowl</groupId>
 			<artifactId>VaultAPI</artifactId>
 			<version>da407c0059</version>
-			<scope>compile</scope>
-			<type>jar</type>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.vexsoftware</groupId>
@@ -101,9 +96,6 @@
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
 			<version>4.1.29.Final</version>
-			<scope>compile</scope>
-			<type>jar</type>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>redis.clients</groupId>
@@ -114,14 +106,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-pool2</artifactId>
 			<version>2.6.0</version>
-			<type>jar</type>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>me.lucko.luckperms</groupId>
 			<artifactId>luckperms-api</artifactId>
 			<version>4.3</version>
-			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

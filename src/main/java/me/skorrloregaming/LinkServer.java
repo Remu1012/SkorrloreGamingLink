@@ -1,6 +1,7 @@
 package me.skorrloregaming;
 
 import me.skorrloregaming.commands.*;
+import me.skorrloregaming.hooks.LuckPerms_Listener;
 import me.skorrloregaming.hooks.ProtocolSupport_Listener;
 import me.skorrloregaming.redis.MapBuilder;
 import me.skorrloregaming.redis.RedisChannel;
@@ -25,6 +26,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import protocolsupportlegacysupport.ProtocolSupportLegacySupport;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -93,6 +95,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 			protoSupportListener.register();
 			protoSupportListener.disableProtocolVersions();
 		}
+		if (Link$.isPluginEnabled("LuckPerms"))
+			new LuckPerms_Listener().register();
 		geolCacheConfig = new ConfigurationManager();
 		geolCacheConfig.setup(new File(this.getDataFolder(), "geolocation_cache.yml"));
 		uuidCacheConfig = new ConfigurationManager();
@@ -149,6 +153,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 				}
 			}
 		}, 7L, 7L);
+		new ProtocolSupportLegacySupport().onEnable();
 	}
 
 	@Override
