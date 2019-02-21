@@ -4,6 +4,7 @@ settings:
     subServer: true
     discordChannel: 'SERVER_CHAT'
     serverName: 'lobby'
+    lobbyServerName: 'lobby'
     ranking:
         enable: true
         prefix: true

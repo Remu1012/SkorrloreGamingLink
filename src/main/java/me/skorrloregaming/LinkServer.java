@@ -1,5 +1,7 @@
 package me.skorrloregaming;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import me.skorrloregaming.commands.*;
 import me.skorrloregaming.hooks.LuckPerms_Listener;
 import me.skorrloregaming.hooks.ProtocolSupport_Listener;
@@ -20,10 +22,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import protocolsupportlegacysupport.ProtocolSupportLegacySupport;
@@ -59,6 +58,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 	private static boolean ingameAnticheatDebug = true;
 
 	private static String serverName;
+	private static String lobbyServerName;
 	private static String discordChannel;
 
 	private static final long BASIC_INVENTORY_UPDATE_DELAY = 5L;
@@ -77,6 +77,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 		saveConfig();
 		reload();
 		serverName = getConfig().getString("settings.serverName", "lobby");
+		lobbyServerName = getConfig().getString("settings.lobbyServerName", "lobby");
 		discordChannel = getConfig().getString("settings.discordChannel", "SERVER_CHAT");
 		barApi = new CraftGo.BarApi();
 		barApi.onEnable();
@@ -87,6 +88,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 		anticheat = new AntiCheat();
 		anticheat.register();
 		if (getConfig().getBoolean("settings.bungeecord", false)) {
+			getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 			redisMessenger = new RedisMessenger();
 			redisMessenger.register();
 		}
@@ -401,6 +403,36 @@ public class LinkServer extends JavaPlugin implements Listener {
 	public void onInventoryClick(InventoryClickEvent event) {
 		if (getPlaytimeManager().onInventoryClick(event))
 			event.setCancelled(true);
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
+		Player player = event.getPlayer();
+		String world = event.getPlayer().getWorld().getName();
+		if (getAntiCheat().antiafk.lackingActivityMinutes.containsKey(player.getUniqueId()))
+			getAntiCheat().antiafk.lackingActivityMinutes.remove(player.getUniqueId());
+		String label = event.getMessage().split(" ")[0];
+		if (label.contains(":") && !player.isOp()) {
+			String[] strArr = event.getMessage().split(" ");
+			strArr[0] = "/" + strArr[0].split(":")[1];
+			if (strArr[0].length() > 0) {
+				event.setMessage(String.join(" ", strArr));
+			} else {
+				event.setCancelled(true);
+			}
+		}
+		label = event.getMessage().split(" ")[0];
+		if (label.equalsIgnoreCase("/hub") || label.equalsIgnoreCase("/lobby")) {
+			if (getConfig().getBoolean("settings.bungeecord", true)) {
+				if (getConfig().getBoolean("settings.subServer", false)) {
+					ByteArrayDataOutput out = ByteStreams.newDataOutput();
+					out.writeUTF("Connect");
+					out.writeUTF(lobbyServerName);
+					player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
+					event.setCancelled(true);
+				}
+			}
+		}
 	}
 
 }
