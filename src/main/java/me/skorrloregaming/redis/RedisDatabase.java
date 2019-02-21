@@ -65,13 +65,7 @@ public class RedisDatabase {
 	}
 
 	public void unregister() {
-		Bukkit.getScheduler().runTask(LinkServer.getPlugin(), new Runnable() {
-
-			@Override
-			public void run() {
-				close();
-			}
-		});
+		close();
 	}
 
 	/**
@@ -115,6 +109,7 @@ public class RedisDatabase {
 				response = getString(table, key, false);
 			}
 		}
+		pipeline.close();
 		return response;
 	}
 
@@ -155,6 +150,7 @@ public class RedisDatabase {
 				response = getKeys(pattern, false);
 			}
 		}
+		pipeline.close();
 		return response;
 	}
 
