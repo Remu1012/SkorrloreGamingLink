@@ -43,7 +43,7 @@ public class ProtocolSupportLegacySupport {
 		new BrewingStandFuelHandler().start();
 		new EnchantingTableHandler().start();
 		new HologramHandler().start();
-		new BossBarHandler().start();
+		//new BossBarHandler().start();
 	}
 
 	public Plugin getPlugin() {
