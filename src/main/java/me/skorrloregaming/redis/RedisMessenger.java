@@ -35,32 +35,20 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 	}
 
 	public void ping(RedisChannel channel, String ping, String playerName) {
-		Bukkit.getScheduler().runTask(LinkServer.getPlugin(), new Runnable() {
-
-			@Override
-			public void run() {
-				Gson gson = new GsonBuilder().create();
-				JsonObject obj = new JsonObject();
-				obj.addProperty("ping", ping);
-				obj.addProperty("playerName", playerName);
-				LinkServer.getRedisDatabase().publish("slgn:" + channel.toString().toLowerCase(), obj.toString());
-			}
-		});
+		Gson gson = new GsonBuilder().create();
+		JsonObject obj = new JsonObject();
+		obj.addProperty("ping", ping);
+		obj.addProperty("playerName", playerName);
+		LinkServer.getRedisDatabase().publish("slgn:" + channel.toString().toLowerCase(), obj.toString());
 	}
 
 	public void broadcast(RedisChannel channel, Map<String, String> message) {
-		Bukkit.getScheduler().runTask(LinkServer.getPlugin(), new Runnable() {
-
-			@Override
-			public void run() {
-				Gson gson = new GsonBuilder().create();
-				JsonObject obj = new JsonObject();
-				for (Map.Entry<String, String> entry : message.entrySet()) {
-					obj.addProperty(entry.getKey(), entry.getValue());
-				}
-				LinkServer.getRedisDatabase().publish("slgn:" + channel.toString().toLowerCase(), obj.toString());
-			}
-		});
+		Gson gson = new GsonBuilder().create();
+		JsonObject obj = new JsonObject();
+		for (Map.Entry<String, String> entry : message.entrySet()) {
+			obj.addProperty(entry.getKey(), entry.getValue());
+		}
+		LinkServer.getRedisDatabase().publish("slgn:" + channel.toString().toLowerCase(), obj.toString());
 	}
 
 	private void bukkitBroadcast(String origin, String message, boolean json) {
