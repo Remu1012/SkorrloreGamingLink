@@ -29,12 +29,7 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 
 			@Override
 			public void run() {
-				LinkServer.getRedisDatabase().getPool().ifPresent((pool) -> {
-					try (Jedis jedis = pool.getResource()) {
-						jedis.subscribe(instance, "slgn:chat");
-					} catch (Exception ex) {
-					}
-				});
+				LinkServer.getRedisDatabase().subscribe(instance, "slgn:chat");
 			}
 		});
 	}
@@ -48,12 +43,7 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 				JsonObject obj = new JsonObject();
 				obj.addProperty("ping", ping);
 				obj.addProperty("playerName", playerName);
-				LinkServer.getRedisDatabase().getPool().ifPresent((pool) -> {
-					try (Jedis jedis = pool.getResource()) {
-						jedis.publish("slgn:" + channel.toString().toLowerCase(), obj.toString());
-					} catch (Exception ex) {
-					}
-				});
+				LinkServer.getRedisDatabase().publish("slgn:" + channel.toString().toLowerCase(), obj.toString());
 			}
 		});
 	}
@@ -68,12 +58,7 @@ public class RedisMessenger extends JedisPubSub implements Listener {
 				for (Map.Entry<String, String> entry : message.entrySet()) {
 					obj.addProperty(entry.getKey(), entry.getValue());
 				}
-				LinkServer.getRedisDatabase().getPool().ifPresent((pool) -> {
-					try (Jedis jedis = pool.getResource()) {
-						jedis.publish("slgn:" + channel.toString().toLowerCase(), obj.toString());
-					} catch (Exception ex) {
-					}
-				});
+				LinkServer.getRedisDatabase().publish("slgn:" + channel.toString().toLowerCase(), obj.toString());
 			}
 		});
 	}
