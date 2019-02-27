@@ -13,8 +13,6 @@ public class RedisDatabase {
 
 	private RedisDatabase instance;
 
-	private Jedis jedis;
-
 	private Jedis connectToRedis() {
 		String hostname = LinkServer.getPlugin().getConfig().getString("settings.redis.hostname", LinkServer.getPlugin().getConfig().getString("settings.redis.hostname", "localhost"));
 		int port = LinkServer.getPlugin().getConfig().getInt("settings.redis.port", 6379);
@@ -31,32 +29,28 @@ public class RedisDatabase {
 		return instance;
 	}
 
-	private boolean close() {
-		jedis.close();
-		return true;
-	}
-
 	public void register() {
 		instance = this;
-		LinkServer.getPlugin().getLogger().info("Connecting to Redis..");
-		jedis = connectToRedis();
-		LinkServer.getPlugin().getLogger().info("Connected to Redis!");
 	}
 
 	public void unregister() {
-		close();
 	}
 
 	public void set(String table, String key, String value) {
+		Jedis jedis = connectToRedis();
 		if (value == null) {
 			jedis.del(table + "." + key);
 		} else {
 			jedis.set(table + "." + key, value);
 		}
+		jedis.close();
 	}
 
 	private String getString(String table, String key, boolean callback) {
-		return jedis.get(table + "." + key);
+		Jedis jedis = connectToRedis();
+		String response = jedis.get(table + "." + key);
+		jedis.close();
+		return response;
 	}
 
 
@@ -65,11 +59,17 @@ public class RedisDatabase {
 	}
 
 	public boolean contains(String table, String key) {
-		return jedis.exists(table + "." + key);
+		Jedis jedis = connectToRedis();
+		boolean response = jedis.exists(table + "." + key);
+		jedis.close();
+		return response;
 	}
 
 	private Set<String> getKeys(String pattern, boolean callback) {
-		return jedis.keys(pattern);
+		Jedis jedis = connectToRedis();
+		Set<String> response = jedis.keys(pattern);
+		jedis.close();
+		return response;
 	}
 
 	public Set<String> getKeys(String pattern) {
@@ -83,6 +83,8 @@ public class RedisDatabase {
 	}
 
 	public void publish(String channel, String message) {
+		Jedis jedis = connectToRedis();
 		jedis.publish(channel, message);
+		jedis.close();
 	}
 }
