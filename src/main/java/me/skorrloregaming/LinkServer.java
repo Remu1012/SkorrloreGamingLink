@@ -13,6 +13,8 @@ import me.skorrloregaming.runnable.AutoBroadcaster;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.entity.Firework;
@@ -20,6 +22,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
@@ -440,11 +443,10 @@ public class LinkServer extends JavaPlugin implements Listener {
 	}
 	
 	@EventHandler
-	public void autoCobbleGenerator(BlockDispenseEvent event) {
+	public void onBlockBreak(BlockDispenseEvent event) {
 		Block block = event.getBlock();
 		org.bukkit.block.data.type.Dispenser blockData = (org.bukkit.block.data.type.Dispenser) block.getBlockData();
 		if (block.getType() == Material.DROPPER) {
-			block.getBlockData();
 			Block facing = block.getRelative(blockData.getFacing());
 			if (facing.getType() == Material.COBBLESTONE) {
 				facing.breakNaturally();
