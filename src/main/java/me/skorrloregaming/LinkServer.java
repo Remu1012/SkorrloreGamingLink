@@ -438,5 +438,18 @@ public class LinkServer extends JavaPlugin implements Listener {
 			}
 		}
 	}
-
+	
+	@EventHandler
+	public void autoCobbleGenerator(BlockDispenseEvent event) {
+		Block block = event.getBlock();
+		org.bukkit.block.data.type.Dispenser blockData = (org.bukkit.block.data.type.Dispenser) block.getBlockData();
+		if (block.getType() == Material.DROPPER) {
+			block.getBlockData();
+			Block facing = block.getRelative(blockData.getFacing());
+			if (facing.getType() == Material.COBBLESTONE) {
+				facing.breakNaturally();
+				event.setCancelled(true);
+			}
+		}
+	}
 }
