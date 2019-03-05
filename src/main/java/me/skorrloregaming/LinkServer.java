@@ -452,10 +452,17 @@ public class LinkServer extends JavaPlugin implements Listener {
 	public void onBlockBreak(BlockDispenseEvent event) {
 		Block block = event.getBlock();
 		org.bukkit.block.data.type.Dispenser blockData = (org.bukkit.block.data.type.Dispenser) block.getBlockData();
-		if (block.getType() == Material.DROPPER) {
+		if (block.getType() == Material.DROPPER || block.getType() == Material.DISPENSER) {
 			Block facing = block.getRelative(blockData.getFacing());
 			if (facing.getType() == Material.COBBLESTONE) {
-				facing.breakNaturally();
+				Block hopperBlock = facing.getRelative(BlockFace.DOWN);
+				if (hopperBlock.getType() == Material.HOPPER) {
+					Hopper hopper = (Hopper) hopperBlock.getState();
+					hopper.getInventory().addItem(new ItemStack(Material.COBBLESTONE));
+					hopper.getBlock().getState().update(true, false);
+				} else {
+					facing.breakNaturally();
+				}
 				event.setCancelled(true);
 			}
 		}
