@@ -508,6 +508,14 @@ public class LinkServer extends JavaPlugin implements Listener {
 			ItemStack stack = new ItemStack(Material.LAPIS_LAZULI);
 			hopper.getInventory().addItem(stack);
 		}
+		Bukkit.getScheduler().runTaskLater(this, new Runnable() {
+
+			@Override
+			public void run() {
+				furnace.setCookTime((short) 20);
+				furnace.getBlock().getState().update(false, true);
+			}
+		}, 2l);
 		hopper.getBlock().getState().update(true, false);
 	}
 }
