@@ -464,7 +464,8 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 						@Override
 						public void run() {
-							facing.breakNaturally();
+							facing.setType(Material.AIR);
+							facing.getState().update(true, false);
 						}
 					}, 2l);
 				} else {
