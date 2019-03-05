@@ -27,6 +27,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
@@ -414,6 +415,13 @@ public class LinkServer extends JavaPlugin implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onInventoryClick(InventoryClickEvent event) {
+		Block blockType = event.getWhoClicked().getTargetBlock(null, 10);
+		if (blockType.getType() == Material.FURNACE) {
+			if ((event.getSlot() == 0 || event.getSlot() == 1) && event.getCursor().getType() != Material.AIR) {
+				Furnace furnace = (Furnace) blockType.getState();
+				furnace.setCookTime((short) 100);
+			}
+		}
 		if (getPlaytimeManager().onInventoryClick(event))
 			event.setCancelled(true);
 	}
@@ -477,8 +485,15 @@ public class LinkServer extends JavaPlugin implements Listener {
 	}
 
 	@EventHandler
+	public void onFurnaceBurn(FurnaceBurnEvent event) {
+		Furnace furnace = (Furnace) event.getBlock().getState();
+		furnace.setCookTime((short) 100);
+	}
+
+	@EventHandler
 	public void onFurnaceSmelt(FurnaceSmeltEvent event) {
 		Furnace furnace = (Furnace) event.getBlock().getState();
+		furnace.setCookTime((short) 100);
 		Block hopperBlock = furnace.getBlock().getRelative(BlockFace.DOWN);
 		if (event.getSource() == null || event.getSource().getType() == Material.AIR)
 			return;
@@ -508,14 +523,6 @@ public class LinkServer extends JavaPlugin implements Listener {
 			ItemStack stack = new ItemStack(Material.LAPIS_LAZULI);
 			hopper.getInventory().addItem(stack);
 		}
-		Bukkit.getScheduler().runTaskLater(this, new Runnable() {
-
-			@Override
-			public void run() {
-				furnace.setCookTime((short) 20);
-				furnace.getBlock().getState().update(false, true);
-			}
-		}, 2l);
 		hopper.getBlock().getState().update(true, false);
 	}
 }
