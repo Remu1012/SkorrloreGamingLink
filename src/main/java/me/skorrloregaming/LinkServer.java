@@ -460,6 +460,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 					Hopper hopper = (Hopper) hopperBlock.getState();
 					hopper.getInventory().addItem(new ItemStack(Material.COBBLESTONE));
 					hopper.getBlock().getState().update(true, false);
+					facing.breakNaturally();
 				} else {
 					facing.breakNaturally();
 				}
