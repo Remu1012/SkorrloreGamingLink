@@ -15,6 +15,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.Furnace;
+import org.bukkit.block.Hopper;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.entity.Firework;
@@ -24,8 +27,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.inventory.FurnaceSmeltEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import protocolsupportlegacysupport.ProtocolSupportLegacySupport;
@@ -33,6 +38,7 @@ import protocolsupportlegacysupport.ProtocolSupportLegacySupport;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -453,5 +459,49 @@ public class LinkServer extends JavaPlugin implements Listener {
 				event.setCancelled(true);
 			}
 		}
+	}
+	
+	@EventHandler
+	public void refinery(FurnaceSmeltEvent event) {
+		Furnace furnace = (Furnace) event.getBlock().getState();
+		if (event.getSource().getType() == null || event.getSource().getType() != Material.COBBLESTONE || furnace.getBlock().getRelative(BlockFace.DOWN).getType() != Material.HOPPER) return;
+		Block blockAbove = furnace.getBlock().getRelative(BlockFace.UP);
+		Hopper hopperBelow = (Hopper) furnace.getBlock().getRelative(BlockFace.DOWN).getState();
+		Random random = new Random(UUID.randomUUID().hashCode());
+		switch (blockAbove.getType()) {
+			case EMERALD_BLOCK:
+				if (random.nextInt(100) == 0) {
+					ItemStack stack = new ItemStack(Material.EMERALD);
+					hopperBelow.getInventory().addItem(stack);
+				}
+				break;
+			case DIAMOND_BLOCK:
+				if (random.nextInt(80) == 0) {
+					ItemStack stack = new ItemStack(Material.DIAMOND);
+					hopperBelow.getInventory().addItem(stack);
+				}
+				break;
+			case IRON_BLOCK:
+			case GOLD_BLOCK:
+				if (random.nextInt(40) == 0) {
+					ItemStack stack = new ItemStack(Material.getMaterial(blockAbove.getType().toString().substring(0, blockAbove.getType().toString().indexOf("_")) + "_INGOT"));
+					hopperBelow.getInventory().addItem(stack);
+				}
+				break;
+			case COAL_BLOCK:
+			case REDSTONE_BLOCK:
+				if (random.nextInt(20) == 0) {
+					ItemStack stack = new ItemStack(Material.getMaterial(blockAbove.getType().toString().split("_")[0]));
+					hopperBelow.getInventory().addItem(stack);
+				}
+				break;
+			case LAPIS_BLOCK:
+				if (random.nextInt(20) == 0) {
+					ItemStack stack = new ItemStack(Material.LAPIS_LAZULI);
+					hopperBelow.getInventory().addItem(stack);
+				}
+				break;
+		}
+		hopperBelow.getBlock().getState().update(true, false);
 	}
 }
