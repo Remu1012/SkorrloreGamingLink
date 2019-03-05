@@ -447,7 +447,7 @@ public class LinkServer extends JavaPlugin implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler
 	public void onBlockBreak(BlockDispenseEvent event) {
 		Block block = event.getBlock();
@@ -460,57 +460,39 @@ public class LinkServer extends JavaPlugin implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler
-	public void refinery(FurnaceSmeltEvent event) {
+	public void onFurnaceSmelt(FurnaceSmeltEvent event) {
 		Furnace furnace = (Furnace) event.getBlock().getState();
-		if (event.getSource().getType() == null || event.getSource().getType() != Material.COBBLESTONE || furnace.getBlock().getRelative(BlockFace.DOWN).getType() != Material.HOPPER) return;
-		Hopper hopperBelow = (Hopper) furnace.getBlock().getRelative(BlockFace.DOWN).getState();
+		Block hopperBlock = furnace.getBlock().getRelative(BlockFace.DOWN);
+		if (event.getSource() == null || event.getSource().getType() == Material.AIR)
+			return;
+		if (hopperBlock.getType() != Material.HOPPER)
+			return;
+		Hopper hopper = (Hopper) hopperBlock.getState();
 		Random random = new Random(UUID.randomUUID().hashCode());
-		switch (random.nextInt(6)) {
-			case 0:
-				if (random.nextInt(100) == 0) {
-					ItemStack stack = new ItemStack(Material.EMERALD);
-					hopperBelow.getInventory().addItem(stack);
-				}
-				break;
-			case 1:
-				if (random.nextInt(80) == 0) {
-					ItemStack stack = new ItemStack(Material.DIAMOND);
-					hopperBelow.getInventory().addItem(stack);
-				}
-				break;
-			case 2:
-				if (random.nextInt(40) == 0) {
-					ItemStack stack = new ItemStack(Material.IRON_INGOT);
-					hopperBelow.getInventory().addItem(stack);
-				}
-				break;
-			case 3:
-				if (random.nextInt(40) == 0) {
-					ItemStack stack = new ItemStack(Material.GOLD_INGOT);
-					hopperBelow.getInventory().addItem(stack);
-				}
-				break;
-			case 4:
-				if (random.nextInt(20) == 0) {
-					ItemStack stack = new ItemStack(Material.COAL);
-					hopperBelow.getInventory().addItem(stack);
-				}
-				break;
-			case 5:
-				if (random.nextInt(20) == 0) {
-					ItemStack stack = new ItemStack(Material.REDSTONE);
-					hopperBelow.getInventory().addItem(stack);
-				}
-				break;
-			case 6:
-				if (random.nextInt(20) == 0) {
-					ItemStack stack = new ItemStack(Material.LAPIS_LAZULI);
-					hopperBelow.getInventory().addItem(stack);
-				}
-				break;
+		if (new Random(UUID.randomUUID().hashCode()).nextInt(110) == 0) {
+			ItemStack stack = new ItemStack(Material.EMERALD);
+			hopper.getInventory().addItem(stack);
+		} else if (new Random(UUID.randomUUID().hashCode()).nextInt(75) == 0) {
+			ItemStack stack = new ItemStack(Material.DIAMOND);
+			hopper.getInventory().addItem(stack);
+		} else if (new Random(UUID.randomUUID().hashCode()).nextInt(30) == 0) {
+			ItemStack stack = new ItemStack(Material.IRON_INGOT);
+			hopper.getInventory().addItem(stack);
+		} else if (new Random(UUID.randomUUID().hashCode()).nextInt(30) == 0) {
+			ItemStack stack = new ItemStack(Material.GOLD_INGOT);
+			hopper.getInventory().addItem(stack);
+		} else if (new Random(UUID.randomUUID().hashCode()).nextInt(10) == 0) {
+			ItemStack stack = new ItemStack(Material.COAL);
+			hopper.getInventory().addItem(stack);
+		} else if (new Random(UUID.randomUUID().hashCode()).nextInt(10) == 0) {
+			ItemStack stack = new ItemStack(Material.REDSTONE);
+			hopper.getInventory().addItem(stack);
+		} else if (new Random(UUID.randomUUID().hashCode()).nextInt(10) == 0) {
+			ItemStack stack = new ItemStack(Material.LAPIS_LAZULI);
+			hopper.getInventory().addItem(stack);
 		}
-		hopperBelow.getBlock().getState().update(true, false);
+		hopper.getBlock().getState().update(true, false);
 	}
 }
