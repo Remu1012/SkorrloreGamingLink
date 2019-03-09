@@ -33,6 +33,7 @@ public class SyncCmd implements CommandExecutor {
 				if (args[codeInputIndex].toString().equals((LinkServer.getPlugin().getConfig().getInt(path + ".id") + "").toString())) {
 					player.sendMessage(Link$.Legacy.tag + ChatColor.RED + "Success. " + ChatColor.GRAY + "The specified account is now synced with this account. Your username and uuid will be the shared between both accounts, which means that you cannot login with both accounts at the same time.");
 					LinkServer.getPlugin().getConfig().set(path + ".est", true);
+					LinkServer.getPlugin().saveConfig();
 					if (targetPlayer.isOnline()) {
 						targetPlayer.getPlayer().kickPlayer(player.getName() + " has synced with your account, please rejoin for the changes to take effect.");
 					}
@@ -54,6 +55,7 @@ public class SyncCmd implements CommandExecutor {
 					player.sendMessage(Link$.Legacy.tag + ChatColor.RED + "Warning. " + ChatColor.GRAY + "The target player is not online at this time. If you are syncing with a pocket edition client, the client must be actively connected to the server in order to sync your account with the client.");
 					player.sendMessage(Link$.Legacy.tag + ChatColor.RED + "Almost done. " + ChatColor.GRAY + "You will need to type a command that will be given to the target player the next time he/she connects to the server. This is a security measure to prevent unauthorized access to accounts.");
 				}
+				LinkServer.getPlugin().saveConfig();
 			}
 		} else {
 			player.sendMessage(Link$.Legacy.tag + ChatColor.RED + "Failed. " + ChatColor.GRAY + "The specified player was not found on record. Usernames are case-sensitive, so make sure you typed it correctly. This is a safe-guard to help people sync their accounts correctly. If you typed the username correctly, you can force the account to sync by typing " + ChatColor.RED + "/" + label + " " + args[0] + " -f" + ChatColor.GRAY + ".");
